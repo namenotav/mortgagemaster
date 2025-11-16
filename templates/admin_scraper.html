@@ -211,6 +211,27 @@
         .status-planned {
             color: #ffc107;
         }
+
+        .timestamp-footer {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .timestamp-footer .time {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 0.5rem;
+        }
+
+        .timestamp-footer .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -327,6 +348,34 @@
         <a href="{{ url_for('index') }}" class="back-link">← Back to Homepage</a>
         <span style="color: white; margin: 0 1rem;">|</span>
         <a href="{{ url_for('admin_control') }}" class="back-link">🎛️ Gatekeeper Dashboard</a>
+
+        <!-- Timestamp Footer -->
+        <div class="timestamp-footer">
+            <div class="label">📅 Page Last Loaded</div>
+            <div class="time" id="currentTime">{{ current_time }}</div>
+        </div>
     </div>
+
+    <script>
+        // Update timestamp every second to show it's live
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            document.getElementById('currentTime').textContent = now.toLocaleDateString('en-GB', options);
+        }
+
+        // Update immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
 </body>
 </html>

@@ -647,6 +647,9 @@ def register_routes(app):
         # Get last refresh time from settings (if tracked)
         last_refresh = Settings.get('LAST_SCRAPE_TIME', 'Never')
 
+        # Get current time for page timestamp
+        current_time = datetime.utcnow().strftime('%A, %d %B %Y %H:%M:%S UTC')
+
         stats = {
             'total_deals': total_deals,
             'mainstream': mainstream_count,
@@ -655,7 +658,7 @@ def register_routes(app):
             'last_refresh': last_refresh
         }
 
-        return render_template('admin_scraper.html', stats=stats)
+        return render_template('admin_scraper.html', stats=stats, current_time=current_time)
 
     @app.route('/admin/refresh-deals-now', methods=['POST'])
     @csrf.exempt
