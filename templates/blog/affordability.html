@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}How Much Mortgage Can I Afford in the UK? | MortgageMaster{% endblock %}
+
+{% block content %}
+<section class="blog-post">
+    <div class="container">
+        <a href="{{ url_for('blog') }}" class="back-link">← Back to all guides</a>
+
+        <h1>How Much Mortgage Can I Afford in the UK?</h1>
+        <p class="post-meta">Simple UK affordability guide • First-time buyers & movers</p>
+
+        <p>
+            One of the first questions people ask is: 
+            <strong>“How much can I actually borrow?”</strong>
+            The answer depends on your income, deposit, debts, and the lender’s criteria.
+        </p>
+
+        <h2>1. Income Multiples (The Quick Rule of Thumb)</h2>
+        <p>
+            Most UK lenders will lend somewhere around:
+        </p>
+        <ul>
+            <li><strong>4x to 4.5x</strong> your annual income as a starting point</li>
+            <li>Sometimes up to <strong>5x or 5.5x</strong> for high earners with low debts</li>
+        </ul>
+
+        <p>
+            Example: If you earn £50,000 per year, a typical max range might be:
+            <strong>£200,000–£250,000</strong> mortgage.
+        </p>
+
+        <h2>2. Your Deposit & Loan-to-Value (LTV)</h2>
+        <p>
+            Your <strong>deposit percentage</strong> changes everything:
+        </p>
+        <ul>
+            <li>5–10% deposit → higher rates, fewer lenders</li>
+            <li>15–25% deposit → much better choice & rates</li>
+            <li>40%+ deposit → often the cheapest deals</li>
+        </ul>
+
+        <h2>3. Monthly Payment Comfort Zone</h2>
+        <p>
+            Forget the maximum the bank will lend for a moment. 
+            Ask yourself: <strong>“What monthly payment can I comfortably afford?”</strong>
+        </p>
+
+        <p>
+            A good rule is to aim for your total mortgage payment to be 
+            <strong>no more than 25–30% of your take-home pay</strong> where possible.
+        </p>
+
+        <h2>Use MortgageDealsHub to Test Scenarios</h2>
+        <p>
+            With MortgageDealsHub you can:
+        </p>
+        <ul>
+            <li>Try different property values and deposits</li>
+            <li>See how your monthly payment changes</li>
+            <li>Filter for fixed periods (2, 5, 10 years)</li>
+        </ul>
+
+        <a href="{{ url_for('index') }}" class="btn-primary">Check How Much I Can Borrow</a>
+    </div>
+</section>
+{% endblock %}

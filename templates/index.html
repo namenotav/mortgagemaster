@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Preload critical assets -->
+<link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
+<link rel="preload" href="{{ url_for('static', filename='img/logo.png') }}" as="image">
+<link rel="preload" href="https://fonts.gstatic.com" as="font" type="font/woff2" crossorigin">
+
+<!-- Improve page load performance -->
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+
+<meta http-equiv="x-ua-compatible" content="IE=edge">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Load JS faster -->
+<script defer src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XXXXXXX');
+</script>
+
+<script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- Security & SEO Headers -->
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+<title>{% block title %}Find the Best UK Mortgage Deals | MortgageDealsHub{% endblock %}</title>
+
+{% block meta_description %}
+<meta name="description" content="Compare the best UK mortgage deals from HSBC, Barclays, Nationwide & Halifax. Use our calculator to find the cheapest mortgages and track rate changes — free to start.">
+{% endblock %}
+
+<link rel="canonical" href="https://mortgagedealshub.co.uk">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content="MortgageDealsHub – Compare the Best UK Mortgage Deals 2025">
+<meta property="og:description" content="Find the best UK mortgage rates, see the true cost including fees, and get real-time alerts when better deals appear.">
+<meta property="og:url" content="https://mortgagedealshub.co.uk">
+<meta property="og:image" content="https://mortgagedealshub.co.uk/static/img/og-preview.png">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Compare UK Mortgage Deals | MortgageDealsHub">
+<meta name="twitter:description" content="Find your perfect UK mortgage with real-time rate alerts and fee comparisons.">
+<meta name="twitter:image" content="https://mortgagedealshub.co.uk/static/img/og-preview.png">
+
+<meta name="keywords" content="best UK mortgage deals, compare mortgages UK, mortgage calculator, cheapest mortgage rates, remortgage deals, first time buyer mortgage, UK mortgage comparison">
+
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FinancialService",
+  "name": "MortgageDealsHub",
+  "url": "https://mortgagedealshub.co.uk",
+  "logo": "https://mortgagedealshub.co.uk/static/img/logo.png",
+  "description": "MortgageDealsHub helps UK homebuyers find the best mortgage deals, compare true costs, and track rate changes.",
+  "sameAs": [
+    "https://www.facebook.com/MortgageDealsHub",
+    "https://www.instagram.com/mortgagedealshub",
+    "https://twitter.com/mortgagedealshub"
+  ],
+  "areaServed": { "@type": "Country", "name": "United Kingdom" }
+}
+</script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <header class="main-header">
+    <div class="container">
+      <div class="header-content">
+
+        <a href="{{ url_for('index') }}" class="logo">
+          <span class="logo-icon">🏡</span>
+          <span class="logo-text">MortgageDealsHub</span>
+        </a>
+
+        <nav class="main-nav">
+          {% if current_user.is_authenticated %}
+              <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+              <a href="{{ url_for('blog') }}" class="nav-link">Mortgage Guides</a>
+              {% if current_user.is_pro() %}
+                  <span class="pro-badge">PRO</span>
+              {% else %}
+                  <a href="{{ url_for('upgrade') }}" class="btn-upgrade">Upgrade</a>
+              {% endif %}
+              <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+          {% else %}
+              <a href="{{ url_for('blog') }}" class="nav-link">Mortgage Guides</a>
+              <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+              <a href="{{ url_for('signup') }}" class="btn-primary">Sign Up</a>
+          {% endif %}
+        </nav>
+
+      </div>
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+{% block content %}
+
+<section class="homepage-hero">
+    <div class="container">
+        <div class="hero-card">
+            <h1 class="hero-title">Find Your Perfect Mortgage</h1>
+
+            <form action="{{ url_for('search_deals') }}" method="GET" class="mortgage-form">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Property Value (£)</label>
+                        <input type="number" name="property_value" value="300000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Deposit (£)</label>
+                        <input type="number" name="deposit" value="30000" required>
+                        <small class="ltv-label">LTV: <span id="ltv-output">90%</span></small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Annual Income (£)</label>
+                        <input type="number" name="income" value="50000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preferred Term</label>
+                        <select name="term">
+                            <option value="2">2 Years</option>
+                            <option value="3">3 Years</option>
+                            <option value="5" selected>5 Years</option>
+                            <option value="10">10 Years</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" name="first_time" checked>
+                    <label>I'm a first-time buyer</label>
+                </div>
+
+                <button type="submit" class="btn-primary large-btn">
+                    Find My Best Deals 🚀
+                </button>
+
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+</main>
+
+
+  <section class="homepage-faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <h3>Is MortgageDealsHub free to use?</h3>
+        <p>Yes. You can compare deals and run calculations for free. Our optional Pro plan adds extra tools like unlimited tracked deals and rate alerts.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Are you a mortgage broker?</h3>
+        <p>No. We’re an independent comparison and education tool. We don’t give regulated financial advice. You should always speak to an FCA-regulated adviser before making a final decision.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Does using this affect my credit score?</h3>
+        <p>No. We don’t run credit checks. We simply help you understand and compare the deals that might be suitable for you.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>How do you make money?</h3>
+        <p>We may earn money from our Pro plan and, in future, from introductions to trusted FCA-regulated brokers. This never changes how we rank deals for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <div class="container">
+      <p>&copy; 2025 MortgageDealsHub. All rights reserved.
+        <a href="{{ url_for('privacy') }}">Privacy</a> ·
+        <a href="{{ url_for('terms') }}">Terms</a>
+      </p>
+    </div>
+
+    <section class="pro-teaser">
+      <div class="container text-center">
+        <h2>Upgrade to Pro — Save Even More</h2>
+        <p>
+          Unlock unlimited deal alerts, advanced calculators, and lifetime tracking for just 
+          <strong>£14.99/month</strong> or <strong>£49 one-time</strong>.
+        </p>
+        <a href="{{ url_for('upgrade') }}" class="btn-upgrade">See Pro Plans →</a>
+      </div>
+    </section>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Upgrade to Pro | MortgageDealsHub{% endblock %}
+
+{% block content %}
+<section class="pricing-page">
+    <div class="container">
+        <h1 class="page-title">Upgrade to MortgageDealsHub Pro</h1>
+        <p class="page-subtitle">
+            Unlock smarter mortgage decisions in minutes. One small fee can save you thousands over your term.
+        </p>
+
+        <div class="pricing-options">
+            <!-- YEARLY PLAN -->
+            <div class="pricing-card featured">
+                <h2>Yearly Access</h2>
+                <p class="price">
+                    £49 <span>one-time</span>
+                </p>
+                <p class="tagline">Best for serious buyers & remortgagers</p>
+
+                <ul class="features-list">
+                    <li>✅ Unlimited mortgage deal tracking</li>
+                    <li>✅ Instant rate change alerts</li>
+                    <li>✅ Full fee breakdown (true cost calculator)</li>
+                    <li>✅ Remortgage reminders</li>
+                    <li>✅ Priority support</li>
+                </ul>
+
+                <a href="{{ url_for('upgrade_yearly') }}" class="btn-primary btn-block">
+                    Buy Yearly Access
+                </a>
+            </div>
+
+            <!-- MONTHLY PLAN -->
+            <div class="pricing-card">
+                <h2>Monthly Plan</h2>
+                <p class="price">
+                    £14.99 <span>/ month</span>
+                </p>
+                <p class="tagline">Try it while you’re house hunting</p>
+
+                <ul class="features-list">
+                    <li>✅ All Pro features included</li>
+                    <li>✅ Cancel anytime</li>
+                    <li>✅ Perfect for short-term use</li>
+                </ul>
+
+                <a href="{{ url_for('upgrade_monthly') }}" class="btn-secondary btn-block">
+                    Start Monthly Plan
+                </a>
+            </div>
+        </div>
+
+        <!-- URGENCY MESSAGE -->
+        <p class="small text-center">
+            ⚡ Limited launch offer — Yearly Access £49 (usually £99).<br>
+            Price may increase as we add more features.
+        </p>
+
+        <!-- MONEY-BACK GUARANTEE -->
+        <p class="guarantee text-center">
+            💸 7-Day Money-Back Guarantee – if you don’t love it, email us and we’ll refund you. No hassle.
+        </p>
+
+        <p class="text-center">
+            <a href="{{ url_for('dashboard') }}" class="link-back">← Back to dashboard</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+

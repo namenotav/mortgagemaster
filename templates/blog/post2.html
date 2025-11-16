@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Best UK Mortgage Deals – November 2025 | MortgageDealsHub{% endblock %}
+{% block content %}
+<section class="blog-post">
+    <h1>Best UK Mortgage Deals for November 2025 (Updated Daily)</h1>
+    <p>Looking for the lowest mortgage rates in the UK right now? We’ve compiled live deals from HSBC, Barclays, Nationwide, Halifax, and more — updated every morning via MortgageDealsHub’s smart comparison engine.</p>
+
+    <h2>🏦 Top Fixed-Rate Deals</h2>
+    <ul>
+        <li>Barclays – 4.69% 5-year fixed (LTV 75%)</li>
+        <li>Nationwide – 4.59% 2-year fixed (LTV 80%)</li>
+        <li>Halifax – 4.74% 5-year fixed (LTV 90%)</li>
+    </ul>
+
+    <h2>📉 Tracker & Variable Deals</h2>
+    <p>Tracker mortgages can save you money when Bank of England rates drop. MortgageDealsHub monitors base rate changes and notifies Pro members the moment better rates appear.</p>
+
+    <h2>Get Personalised Deals</h2>
+    <p>Use our <a href="{{ url_for('index') }}">Free UK Mortgage Finder</a> to instantly see which deals fit your income and deposit.</p>
+
+    <p><small>💡 Upgrade to <a href="{{ url_for('upgrade') }}">Pro</a> for £14.99/month to unlock unlimited rate alerts and hidden fee calculators.</small></p>
+</section>
+{% endblock %}

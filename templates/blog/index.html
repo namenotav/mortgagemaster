@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Mortgage Guides & UK Mortgage Tips | MortgageDealsHub{% endblock %}
+
+{% block content %}
+<section class="hero hero-small">
+    <div class="container">
+        <h1>Mortgage Guides & UK Mortgage Tips</h1>
+        <p class="hero-subtitle">
+            Clear, simple guides to help you find the best UK mortgage deals and avoid expensive mistakes.
+        </p>
+    </div>
+</section>
+
+<section class="blog-list">
+    <div class="container">
+        <div class="blog-grid">
+            <article class="blog-card">
+                <h2>
+                    <a href="{{ url_for('blog_best_deals') }}">
+                        Best UK Mortgage Deals – November 2025
+                    </a>
+                </h2>
+                <p>
+                    We break down current UK mortgage rates, what counts as a “good” rate in 2025, 
+                    and how to compare deals properly.
+                </p>
+                <a href="{{ url_for('blog_best_deals') }}" class="blog-read-more">Read guide →</a>
+            </article>
+
+            <article class="blog-card">
+                <h2>
+                    <a href="{{ url_for('blog_affordability') }}">
+                        How Much Mortgage Can I Afford in the UK?
+                    </a>
+                </h2>
+                <p>
+                    Learn how lenders calculate affordability, what income multiples mean, 
+                    and how your deposit changes your options.
+                </p>
+                <a href="{{ url_for('blog_affordability') }}" class="blog-read-more">Read guide →</a>
+            </article>
+
+            <article class="blog-card">
+                <h2>
+                    <a href="{{ url_for('blog_fixed_vs_tracker') }}">
+                        Fixed vs Tracker Mortgages – Which Is Better?
+                    </a>
+                </h2>
+                <p>
+                    We compare fixed and tracker mortgages in plain English, including pros, cons, 
+                    and who each type is best for.
+                </p>
+                <a href="{{ url_for('blog_fixed_vs_tracker') }}" class="blog-read-more">Read guide →</a>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

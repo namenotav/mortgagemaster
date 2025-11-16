@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Best UK Mortgage Deals – November 2025 | MortgageMaster{% endblock %}
+
+{% block content %}
+<section class="blog-post">
+    <div class="container">
+        <a href="{{ url_for('blog') }}" class="back-link">← Back to all guides</a>
+
+        <h1>Best UK Mortgage Deals – November 2025</h1>
+        <p class="post-meta">Updated for November 2025 • For UK homebuyers & remortgagers</p>
+
+        <p>
+            UK mortgage rates have been moving a lot in 2024–2025. The good news? 
+            if you compare properly, the difference between an “okay” deal and a 
+            “great” deal can easily be worth <strong>£3,000–£8,000</strong> over the 
+            initial fixed period.
+        </p>
+
+        <h2>What Counts as a Good Mortgage Rate in 2025?</h2>
+        <p>
+            For strong-credit borrowers with a decent deposit (20%+), a competitive 
+            2 or 5 year fixed rate in late 2025 typically looks like:
+        </p>
+        <ul>
+            <li><strong>2 year fixed:</strong> around 4–5% APR</li>
+            <li><strong>5 year fixed:</strong> around 4–4.8% APR</li>
+            <li><strong>10 year fixed:</strong> slightly higher, but more stability</li>
+        </ul>
+
+        <h2>Why Fees Matter More Than You Think</h2>
+        <p>
+            Many “best buy” tables show the lowest rate — but hide the fact that the deal 
+            comes with a <strong>£999 or £1,499 product fee</strong>. Once you add that fee 
+            on top, a slightly higher rate with no fee can actually be cheaper.
+        </p>
+
+        <p>
+            That’s why MortgageDealsHub focuses on <strong>true cost</strong>: 
+            monthly payment + fees – cashback over the fixed period.
+        </p>
+
+        <h2>How to Quickly Find the Best Deal for You</h2>
+        <ol>
+            <li>Enter your <strong>property value</strong> and <strong>deposit</strong> on the homepage.</li>
+            <li>We calculate your <strong>LTV (loan-to-value)</strong> instantly.</li>
+            <li>We scan through thousands of deals and rank them by real total cost.</li>
+        </ol>
+
+        <p>
+            Ready to see what’s available for you right now?
+        </p>
+        <a href="{{ url_for('index') }}" class="btn-primary">Find My Best UK Mortgage Deal</a>
+    </div>
+</section>
+{% endblock %}

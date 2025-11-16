@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Mortgage Brokers vs Comparison Tools | MortgageDealsHub{% endblock %}
+{% block content %}
+<section class="blog-post">
+    <h1>Why Mortgage Brokers Don’t Want You to Know About Tools Like This</h1>
+    <p>Most brokers are great — but some rely on you not knowing better deals exist elsewhere. They earn commissions, not savings. That’s why we built <strong>MortgageDealsHub</strong>.</p>
+
+    <h2>We Compare Every Lender — Not Just Who Pays Us</h2>
+    <p>MortgageMaster searches deals across the entire UK market — even ones brokers skip. That’s how our users routinely save £3,000–£7,000 compared to their broker quotes.</p>
+
+    <h2>No Sales, No Pressure — Just Savings</h2>
+    <p>You stay anonymous, and in control. When you’re ready, you can connect with a broker directly — or not. Your choice.</p>
+
+    <p><a href="{{ url_for('index') }}" class="btn-primary">Try MortgageDealsHub Free</a></p>
+    <p><small>⚡ Pro Members get instant alerts when rates drop — before brokers even call their clients. <a href="{{ url_for('upgrade') }}">Upgrade Now</a>.</small></p>
+</section>
+{% endblock %}

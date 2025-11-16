@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Should I Remortgage? | MortgageDealsHub{% endblock %}
+{% block content %}
+<section class="blog-post">
+    <h1>Are You Overpaying on Your Mortgage? 4 Signs You Need to Remortgage Now</h1>
+    <ol>
+        <li>Your fixed rate ends within 6 months</li>
+        <li>You’ve gained equity (LTV dropped)</li>
+        <li>Bank of England base rate just changed</li>
+        <li>Your lender hasn’t offered you a better rate</li>
+    </ol>
+
+    <p>Even a 0.3% improvement can save you thousands. Our <a href="{{ url_for('index') }}">free comparison tool</a> checks all lenders and tells you if it’s worth switching.</p>
+
+    <p>Pro users get <strong>automatic reminders</strong> before their fixed rate expires — so they never get trapped on a higher variable rate again.</p>
+
+    <p><a href="{{ url_for('upgrade') }}" class="btn-primary">Upgrade to Pro & Stay One Step Ahead</a></p>
+</section>
+{% endblock %}

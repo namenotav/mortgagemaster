@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Fixed vs Tracker Mortgages – Which Is Better? | MortgageMaster{% endblock %}
+
+{% block content %}
+<section class="blog-post">
+    <div class="container">
+        <a href="{{ url_for('blog') }}" class="back-link">← Back to all guides</a>
+
+        <h1>Fixed vs Tracker Mortgages – Which Is Better?</h1>
+        <p class="post-meta">Understand your options before you lock in</p>
+
+        <p>
+            One of the biggest mortgage decisions you’ll make is 
+            <strong>fixed rate vs tracker</strong>. Both have pros and cons, and the 
+            right choice depends on how much certainty you want.
+        </p>
+
+        <h2>What Is a Fixed-Rate Mortgage?</h2>
+        <p>
+            A fixed-rate mortgage keeps your interest rate the same for a set period 
+            (e.g. 2, 3, 5 or 10 years). Your monthly payment won’t change during that time.
+        </p>
+        <ul>
+            <li>✅ Certainty – you always know your payment</li>
+            <li>✅ Good if rates are expected to rise</li>
+            <li>❌ Usually early repayment charges if you leave early</li>
+        </ul>
+
+        <h2>What Is a Tracker Mortgage?</h2>
+        <p>
+            A tracker mortgage moves in line with a base rate (often the Bank of England base rate), 
+            plus a set percentage.
+        </p>
+        <ul>
+            <li>✅ Can be cheaper if rates fall</li>
+            <li>✅ Sometimes lower fees or more flexibility</li>
+            <li>❌ Payments can rise if interest rates go up</li>
+        </ul>
+
+        <h2>Which One Is Right for You?</h2>
+        <p>
+            Choose a <strong>fixed-rate</strong> mortgage if you:
+        </p>
+        <ul>
+            <li>Like predictable payments</li>
+            <li>Have a tight budget</li>
+            <li>Think rates might rise</li>
+        </ul>
+
+        <p>
+            Consider a <strong>tracker</strong> if you:
+        </p>
+        <ul>
+            <li>Can handle payments moving up and down</li>
+            <li>Think rates might fall or stay low</li>
+            <li>Want more flexibility in some products</li>
+        </ul>
+
+        <h2>Compare Fixed & Tracker Deals Side-by-Side</h2>
+        <p>
+            With MortgageMaster you can:
+        </p>
+        <ul>
+            <li>Filter by fixed or tracker products</li>
+            <li>Sort by total cost, not just rate</li>
+            <li>Save and track your favourite deals</li>
+        </ul>
+
+        <a href="{{ url_for('index') }}" class="btn-primary">Compare Fixed & Tracker Deals Now</a>
+    </div>
+</section>
+{% endblock %}
