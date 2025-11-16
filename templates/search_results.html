@@ -1,47 +1,207 @@
 {% extends "base.html" %}
 
-{% block title %}Search Results - MortgageDealsHub{% endblock %}
+{% block title %}{{ deals|length }} Mortgage Deals Found - MortgageDealsHub{% endblock %}
 
 {% block content %}
-<section class="search-results">
+<section class="search-results-page">
     <div class="container">
-        <h1>Mortgage Deals for You</h1>
+        <h1 class="results-title">🎯 Found {{ deals|length }} Mortgage Deal{% if deals|length != 1 %}s{% endif %} For You</h1>
 
-        <div class="search-summary">
-            <p><strong>Property Value:</strong> £{{ "{:,.0f}".format(property_value) }}</p>
-            <p><strong>Deposit:</strong> £{{ "{:,.0f}".format(deposit) }}</p>
-            <p><strong>Loan Amount:</strong> £{{ "{:,.0f}".format(loan_amount) }}</p>
-            <p><strong>LTV:</strong> {{ "%.1f"|format(ltv) }}%</p>
+        <!-- SEARCH SUMMARY -->
+        <div class="search-summary-card">
+            <div class="summary-row">
+                <div class="summary-item">
+                    <span class="summary-label">Property Value</span>
+                    <span class="summary-value">£{{ "{:,.0f}".format(property_value) }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Deposit</span>
+                    <span class="summary-value">£{{ "{:,.0f}".format(deposit) }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Loan Amount</span>
+                    <span class="summary-value">£{{ "{:,.0f}".format(loan_amount) }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">LTV</span>
+                    <span class="summary-value {% if ltv <= 60 %}ltv-excellent{% elif ltv <= 80 %}ltv-good{% else %}ltv-warning{% endif %}">{{ "%.1f"|format(ltv) }}%</span>
+                </div>
+                {% if credit_score %}
+                <div class="summary-item">
+                    <span class="summary-label">Your Credit Score</span>
+                    <span class="summary-value">{{ credit_score }}</span>
+                </div>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('index') }}" class="btn-secondary btn-small">← Modify Search</a>
         </div>
 
         {% if deals %}
-            <div class="deals-list">
-                <h2>We found {{ deals|length }} deal{% if deals|length != 1 %}s{% endif %} for you:</h2>
-                {% for deal in deals %}
-                <div class="deal-card">
-                    <h3>{{ deal.lender }}</h3>
-                    <div class="deal-rate">
-                        <span class="rate-number">{{ "%.2f"|format(deal.rate) }}%</span>
+            <!-- SORTING INFO -->
+            <div class="sorting-info">
+                <p>💡 <strong>Sorted by TRUE COST</strong> (includes all fees & cashback) — Not just the advertised rate!</p>
+            </div>
+
+            <!-- DEALS LIST -->
+            <div class="enhanced-deals-list">
+                {% for item in deals %}
+                {% set deal = item.deal %}
+                <div class="enhanced-deal-card {% if loop.index <= 3 %}top-deal{% endif %}">
+                    {% if loop.index == 1 %}
+                    <div class="best-deal-badge">🏆 BEST DEAL</div>
+                    {% elif loop.index == 2 %}
+                    <div class="runner-up-badge">🥈 2nd BEST</div>
+                    {% elif loop.index == 3 %}
+                    <div class="runner-up-badge">🥉 3rd BEST</div>
+                    {% endif %}
+
+                    <div class="deal-header">
+                        <div class="lender-info">
+                            <h3 class="lender-name">{{ deal.lender }}</h3>
+                            {% if deal.lender_type == 'specialist' %}
+                            <span class="lender-badge specialist">✅ Accepts Bad Credit</span>
+                            {% elif deal.lender_type == 'building_society' %}
+                            <span class="lender-badge building-society">🏦 Building Society</span>
+                            {% elif deal.lender_type == 'mainstream' %}
+                            <span class="lender-badge mainstream">⭐ Mainstream</span>
+                            {% endif %}
+
+                            {% if deal.accepts_low_income %}
+                            <span class="lender-badge low-income">💰 Accepts Low Income</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="rate-display">
+                            <div class="rate-number">{{ "%.2f"|format(deal.rate) }}%</div>
+                            <div class="rate-label">Interest Rate</div>
+                        </div>
                     </div>
-                    <div class="deal-details">
-                        <p><strong>Max LTV:</strong> {{ deal.ltv_max }}%</p>
-                        <p><strong>Loan Range:</strong> £{{ "{:,.0f}".format(deal.min_loan) }} - £{{ "{:,.0f}".format(deal.max_loan) }}</p>
+
+                    <div class="deal-body">
+                        <!-- TRUE COST BREAKDOWN -->
+                        <div class="cost-breakdown">
+                            <h4>💷 TRUE COST ANALYSIS</h4>
+                            <div class="cost-grid">
+                                <div class="cost-item highlight">
+                                    <span class="cost-label">Monthly Payment</span>
+                                    <span class="cost-value">£{{ "{:,.2f}".format(item.monthly_payment) }}</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Total Interest ({{ term }} years)</span>
+                                    <span class="cost-value">£{{ "{:,.0f}".format(item.total_interest) }}</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Product Fee</span>
+                                    <span class="cost-value">£{{ "{:,.0f}".format(deal.product_fee) }}</span>
+                                </div>
+                                <div class="cost-item {% if deal.cashback > 0 %}positive{% endif %}">
+                                    <span class="cost-label">Cashback</span>
+                                    <span class="cost-value">{% if deal.cashback > 0 %}-{% endif %}£{{ "{:,.0f}".format(deal.cashback) }}</span>
+                                </div>
+                            </div>
+
+                            <div class="true-cost-total">
+                                <span class="total-label">TRUE TOTAL COST ({{ term }} years):</span>
+                                <span class="total-value">£{{ "{:,.0f}".format(item.true_cost) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- DEAL DETAILS -->
+                        <div class="deal-requirements">
+                            <h4>📋 Requirements</h4>
+                            <div class="requirements-grid">
+                                <div class="req-item">
+                                    <span class="req-icon">📊</span>
+                                    <div>
+                                        <strong>Max LTV:</strong> {{ "%.0f"|format(deal.ltv_max) }}%
+                                    </div>
+                                </div>
+                                <div class="req-item">
+                                    <span class="req-icon">💰</span>
+                                    <div>
+                                        <strong>Min Income:</strong> £{{ "{:,.0f}".format(deal.min_income) if deal.min_income > 0 else "None" }}
+                                    </div>
+                                </div>
+                                <div class="req-item">
+                                    <span class="req-icon">⭐</span>
+                                    <div>
+                                        <strong>Min Credit Score:</strong> {{ deal.min_credit_score if deal.min_credit_score > 0 else "Not specified" }}
+                                    </div>
+                                </div>
+                                <div class="req-item">
+                                    <span class="req-icon">🏠</span>
+                                    <div>
+                                        <strong>Loan Range:</strong> £{{ "{:,.0f}".format(deal.min_loan) }} - £{{ "{:,.0f}".format(deal.max_loan) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTION BUTTON -->
+                        {% if current_user.is_authenticated and current_user.is_pro() %}
+                        <div class="deal-actions">
+                            <button class="btn-primary btn-block">💾 Save & Track This Deal</button>
+                            <button class="btn-secondary btn-block">📊 Compare with Others</button>
+                        </div>
+                        {% else %}
+                        <div class="deal-actions">
+                            <div class="pro-required">
+                                <p>🔒 <strong>PRO members</strong> can save deals, get rate alerts, and compare side-by-side</p>
+                                <a href="{{ url_for('upgrade') }}" class="btn-primary btn-block">Upgrade to PRO - £49/year</a>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
+
         {% else %}
-            <div class="no-results">
-                <h2>No deals found</h2>
-                <p>We couldn't find any deals matching your criteria. Try adjusting your search parameters.</p>
-                <a href="{{ url_for('index') }}" class="btn-primary">Search Again</a>
+            <!-- NO RESULTS -->
+            <div class="no-results-card">
+                <div class="no-results-icon">😞</div>
+                <h2>No Deals Found</h2>
+                <p>We couldn't find any lenders matching your criteria.</p>
+
+                {% if credit_score and credit_score < 600 %}
+                <div class="suggestion-box">
+                    <h3>💡 Suggestions for Bad Credit:</h3>
+                    <ul>
+                        <li>✅ Try checking "I have CCJs/defaults/IVAs" in advanced filters</li>
+                        <li>✅ Check our <a href="{{ url_for('bad_credit_help') }}">Bad Credit Mortgage Guide</a></li>
+                        <li>✅ Consider increasing your deposit to improve LTV</li>
+                    </ul>
+                </div>
+                {% elif ltv > 90 %}
+                <div class="suggestion-box">
+                    <h3>💡 High LTV Suggestions:</h3>
+                    <ul>
+                        <li>✅ Try increasing your deposit to get LTV below 90%</li>
+                        <li>✅ Consider Shared Ownership schemes</li>
+                        <li>✅ Look into Help to Buy schemes</li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <a href="{{ url_for('index') }}" class="btn-primary">Try Different Search</a>
             </div>
         {% endif %}
 
-        <div class="cta-section">
-            <h3>Want to track these deals?</h3>
-            <p>Sign up for a free account to save and track deals, and get alerts when rates change.</p>
-            <a href="{{ url_for('signup') }}" class="btn-primary">Sign Up Free</a>
+        <!-- CTA SECTION -->
+        <div class="results-cta">
+            <div class="cta-grid">
+                <div class="cta-card">
+                    <h3>🎯 Want Personalized Help?</h3>
+                    <p>Our PRO members get access to specialist brokers who can find deals not listed here.</p>
+                    <a href="{{ url_for('upgrade') }}" class="btn-primary">Upgrade to PRO</a>
+                </div>
+
+                <div class="cta-card">
+                    <h3>📚 Learn How to Get Better Deals</h3>
+                    <p>Read our comprehensive guides on improving your credit score and boosting your income.</p>
+                    <a href="{{ url_for('mortgage_tips') }}" class="btn-secondary">Read Tips & Tricks</a>
+                </div>
+            </div>
         </div>
     </div>
 </section>

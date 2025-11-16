@@ -170,6 +170,23 @@ def sanitize_string(text, max_length=200):
     text = text.replace('\x00', '').strip()
     return text[:max_length]
 
+def calculate_monthly_payment(loan_amount, annual_rate, years):
+    """Calculate monthly mortgage payment using standard mortgage formula"""
+    if loan_amount <= 0 or annual_rate <= 0 or years <= 0:
+        return 0
+
+    monthly_rate = (annual_rate / 100) / 12
+    num_payments = years * 12
+
+    # Standard mortgage payment formula: M = P[r(1+r)^n]/[(1+r)^n-1]
+    if monthly_rate == 0:
+        return loan_amount / num_payments
+
+    monthly_payment = loan_amount * (monthly_rate * (1 + monthly_rate)**num_payments) / \
+                      ((1 + monthly_rate)**num_payments - 1)
+
+    return round(monthly_payment, 2)
+
 # -------------------------------------------------
 # Routes
 # -------------------------------------------------
@@ -181,13 +198,21 @@ def register_routes(app):
 
     @app.route('/search_deals', methods=['GET'])
     def search_deals():
-        """Search for mortgage deals based on user criteria"""
+        """ADVANCED Search for mortgage deals with credit score & income filtering"""
         try:
             # Get and validate search parameters
             property_value = float(request.args.get('property_value', 0))
             deposit = float(request.args.get('deposit', 0))
             income = float(request.args.get('income', 0))
             term = int(request.args.get('term', 5))
+
+            # ADVANCED FILTERS
+            credit_score = request.args.get('credit_score', None)
+            if credit_score:
+                credit_score = int(credit_score)
+
+            has_bad_credit = request.args.get('has_bad_credit', 'no') == 'yes'
+            accepts_low_income = request.args.get('accepts_low_income', 'no') == 'yes'
 
             # Basic validation
             if property_value <= 0 or deposit <= 0:
@@ -198,21 +223,57 @@ def register_routes(app):
             loan_amount = property_value - deposit
             ltv = (loan_amount / property_value) * 100
 
-            # Query deals that match criteria
-            deals = Deal.query.filter(
+            # Build query with advanced filters
+            query = Deal.query.filter(
                 Deal.ltv_max >= ltv,
                 Deal.min_loan <= loan_amount,
                 Deal.max_loan >= loan_amount
-            ).order_by(Deal.rate.asc()).limit(20).all()
+            )
+
+            # Filter by income if provided
+            if income > 0:
+                query = query.filter(Deal.min_income <= income)
+
+            # Filter by credit score if provided
+            if credit_score:
+                query = query.filter(Deal.min_credit_score <= credit_score)
+
+            # Filter by bad credit acceptance
+            if has_bad_credit:
+                query = query.filter(Deal.accepts_bad_credit == True)
+
+            # Filter by low income acceptance
+            if accepts_low_income:
+                query = query.filter(Deal.accepts_low_income == True)
+
+            # Order by rate (best first) and limit results
+            deals = query.order_by(Deal.rate.asc()).limit(50).all()
+
+            # Calculate TRUE cost for each deal (rate + fees - cashback)
+            deals_with_cost = []
+            for deal in deals:
+                monthly_payment = calculate_monthly_payment(loan_amount, deal.rate, term)
+                total_paid = monthly_payment * (term * 12)
+                true_cost = total_paid + deal.product_fee - deal.cashback
+
+                deals_with_cost.append({
+                    'deal': deal,
+                    'monthly_payment': monthly_payment,
+                    'total_paid': total_paid,
+                    'true_cost': true_cost,
+                    'total_interest': total_paid - loan_amount
+                })
 
             return render_template('search_results.html',
-                deals=deals,
+                deals=deals_with_cost,
                 property_value=property_value,
                 deposit=deposit,
                 loan_amount=loan_amount,
                 ltv=ltv,
                 income=income,
-                term=term
+                term=term,
+                credit_score=credit_score,
+                has_bad_credit=has_bad_credit
             )
         except ValueError:
             flash('Invalid search parameters.', 'danger')

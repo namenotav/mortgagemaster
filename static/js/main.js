@@ -106,3 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("✅ All enhancements loaded");
 });
+
+// Advanced Filters Toggle
+function toggleAdvanced() {
+    const content = document.getElementById('advanced-filters');
+    const icon = document.getElementById('toggle-icon');
+
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        icon.textContent = '▲';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▼';
+    }
+}

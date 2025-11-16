@@ -116,8 +116,8 @@
     <div class="container">
         <div class="hero-card">
             <div class="hero-badge">🏆 #1 Rated UK Mortgage Comparison Tool</div>
-            <h1 class="hero-title">Compare 36+ UK Mortgage Deals in Seconds</h1>
-            <p class="hero-subtitle">Save thousands on your mortgage. Real rates from HSBC, Barclays, Nationwide & more — updated daily.</p>
+            <h1 class="hero-title">Compare 39 UK Mortgage Deals in Seconds</h1>
+            <p class="hero-subtitle">Save thousands on your mortgage. Real rates from HSBC, Barclays, Nationwide & more — updated daily. <strong>We help people with bad credit (300+) & low income (£10k+)!</strong></p>
 
             <form action="{{ url_for('search_deals') }}" method="GET" class="mortgage-form">
 
@@ -141,23 +141,56 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Preferred Term</label>
+                        <label>Preferred Term (Years)</label>
                         <select name="term">
                             <option value="2">2 Years</option>
                             <option value="3">3 Years</option>
                             <option value="5" selected>5 Years</option>
                             <option value="10">10 Years</option>
+                            <option value="25">25 Years (Full Term)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" name="first_time" checked>
-                    <label>I'm a first-time buyer</label>
+                <!-- ADVANCED FILTERS -->
+                <div class="advanced-filters-section">
+                    <button type="button" class="filter-toggle" onclick="toggleAdvanced()">
+                        ⚙️ Advanced Filters (Credit Score, Bad Credit) <span id="toggle-icon">▼</span>
+                    </button>
+
+                    <div id="advanced-filters" class="advanced-filters-content" style="display:none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Your Credit Score (Optional)</label>
+                                <select name="credit_score">
+                                    <option value="">Don't know / Skip</option>
+                                    <option value="850">Excellent (720-850)</option>
+                                    <option value="720">Very Good (680-720)</option>
+                                    <option value="680">Good (640-680)</option>
+                                    <option value="640">Fair (600-640)</option>
+                                    <option value="600">Poor (550-600)</option>
+                                    <option value="550">Very Poor (500-550)</option>
+                                    <option value="500">Bad (450-500)</option>
+                                    <option value="450">Severe (400-450)</option>
+                                    <option value="400">Critical (350-400)</option>
+                                    <option value="350">Very Critical (300-350)</option>
+                                </select>
+                                <small>💡 We have lenders accepting scores as low as 300!</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Special Circumstances</label>
+                                <div class="checkbox-group-inline">
+                                    <label><input type="checkbox" name="has_bad_credit" value="yes"> I have CCJs/defaults/IVAs</label>
+                                    <label><input type="checkbox" name="accepts_low_income" value="yes"> My income is under £20k</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary large-btn">
-                    Find My Best Deals 🚀
+                    🚀 Find My Best Deals (Including Bad Credit Lenders)
                 </button>
 
             </form>
@@ -183,20 +216,20 @@
     <div class="container">
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number">36+</div>
+                <div class="stat-number">39</div>
                 <div class="stat-label">Live Mortgage Deals</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">£3,200</div>
-                <div class="stat-label">Average Savings Per Year</div>
+                <div class="stat-number">300+</div>
+                <div class="stat-label">Minimum Credit Score Accepted</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Rate Monitoring</div>
+                <div class="stat-number">12</div>
+                <div class="stat-label">Specialist Bad Credit Lenders</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">9 Lenders</div>
-                <div class="stat-label">Major UK Banks</div>
+                <div class="stat-number">£10k+</div>
+                <div class="stat-label">Minimum Income Accepted</div>
             </div>
         </div>
     </div>
