@@ -84,6 +84,35 @@ class Subscriber(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Settings(db.Model):
+    """Simple key-value store for app settings"""
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.String(200), nullable=False)
+
+    @staticmethod
+    def get(key, default=''):
+        """Get a setting value"""
+        setting = Settings.query.filter_by(key=key).first()
+        return setting.value if setting else default
+
+    @staticmethod
+    def set(key, value):
+        """Set a setting value"""
+        setting = Settings.query.filter_by(key=key).first()
+        if setting:
+            setting.value = str(value)
+        else:
+            setting = Settings(key=key, value=str(value))
+            db.session.add(setting)
+        db.session.commit()
+
+    @staticmethod
+    def is_demo_mode():
+        """Check if DEMO_MODE is enabled (default: True)"""
+        return Settings.get('DEMO_MODE', 'True') == 'True'
+
+
 # -------------------------------------------------
 # App Factory
 # -------------------------------------------------
@@ -264,8 +293,32 @@ def register_routes(app):
                     'total_interest': total_paid - loan_amount
                 })
 
+            # Sort by TRUE cost (best deals first)
+            deals_with_cost.sort(key=lambda x: x['true_cost'])
+
+            # 🎛️ GATEKEEPER: Check DEMO_MODE and user status
+            demo_mode = Settings.is_demo_mode()
+            is_pro_user = current_user.is_authenticated and current_user.is_pro()
+
+            # Determine if we should limit results
+            should_limit = not demo_mode and not is_pro_user
+
+            # Store all deals for template reference
+            all_deals = deals_with_cost
+
+            # If limiting, only show top 3
+            if should_limit:
+                visible_deals = deals_with_cost[:3]
+                locked_deals = deals_with_cost[3:]
+            else:
+                visible_deals = deals_with_cost
+                locked_deals = []
+
             return render_template('search_results.html',
-                deals=deals_with_cost,
+                deals=visible_deals,
+                locked_deals=locked_deals,
+                total_deals_count=len(all_deals),
+                is_limited=should_limit,
                 property_value=property_value,
                 deposit=deposit,
                 loan_amount=loan_amount,
@@ -562,6 +615,23 @@ def register_routes(app):
         logging.info(f"New subscriber: {validated_email}")
         flash('Thanks! You will receive rate alerts by email.', 'success')
         return redirect(url_for('index'))
+
+    # ---------- Admin Control Panel (GATEKEEPER) ----------
+    @app.route('/secret-admin-control-xyz')
+    def admin_control():
+        """Secret admin panel to toggle DEMO_MODE"""
+        demo_mode = Settings.is_demo_mode()
+        return render_template('admin_control.html', demo_mode=demo_mode)
+
+    @app.route('/toggle-demo-mode', methods=['POST'])
+    @csrf.exempt  # Simple toggle, no CSRF needed for this internal tool
+    def toggle_demo_mode():
+        """Toggle DEMO_MODE on/off"""
+        current = Settings.is_demo_mode()
+        new_value = 'False' if current else 'True'
+        Settings.set('DEMO_MODE', new_value)
+        logging.info(f"🎛️ DEMO_MODE toggled to {new_value}")
+        return redirect(url_for('admin_control'))
 
     # ---------- Error pages ----------
     @app.errorhandler(404)

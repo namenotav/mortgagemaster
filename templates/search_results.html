@@ -5,7 +5,14 @@
 {% block content %}
 <section class="search-results-page">
     <div class="container">
-        <h1 class="results-title">🎯 Found {{ deals|length }} Mortgage Deal{% if deals|length != 1 %}s{% endif %} For You</h1>
+        <h1 class="results-title">🎯 Found {{ total_deals_count }} Mortgage Deal{% if total_deals_count != 1 %}s{% endif %} For You</h1>
+
+        {% if is_limited %}
+        <div class="free-user-notice">
+            <p>🆓 <strong>Showing top 3 deals</strong> — Upgrade to PRO to unlock all {{ total_deals_count }} deals + save favorites + get rate alerts</p>
+            <a href="{{ url_for('upgrade') }}" class="btn-upgrade-inline">Unlock All Deals - £49/year</a>
+        </div>
+        {% endif %}
 
         <!-- SEARCH SUMMARY -->
         <div class="search-summary-card">
@@ -155,6 +162,63 @@
                 </div>
                 {% endfor %}
             </div>
+
+            <!-- LOCKED DEALS (for FREE users) -->
+            {% if is_limited and locked_deals %}
+            <div class="locked-deals-section">
+                <div class="locked-header">
+                    <h2>🔒 {{ locked_deals|length }} More Deals Available</h2>
+                    <p>Upgrade to PRO to unlock these deals and more features</p>
+                    <a href="{{ url_for('upgrade') }}" class="btn-primary">Unlock All Deals - £49/year</a>
+                </div>
+
+                <div class="locked-deals-grid">
+                    {% for item in locked_deals[:6] %}
+                    {% set deal = item.deal %}
+                    <div class="locked-deal-card">
+                        <div class="lock-overlay">
+                            <div class="lock-icon">🔒</div>
+                            <p class="lock-message">PRO Only</p>
+                        </div>
+                        <div class="locked-content">
+                            <h3 class="lender-name">{{ deal.lender }}</h3>
+                            <div class="rate-number">{{ "%.2f"|format(deal.rate) }}%</div>
+                            <div class="monthly-payment">£{{ "{:,.2f}".format(item.monthly_payment) }}/mo</div>
+                            {% if deal.lender_type == 'specialist' %}
+                            <span class="lender-badge specialist">✅ Bad Credit OK</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if locked_deals|length > 6 %}
+                    <div class="locked-deal-card more-deals">
+                        <div class="lock-overlay">
+                            <div class="lock-icon">🔒</div>
+                        </div>
+                        <div class="locked-content centered">
+                            <h3>+{{ locked_deals|length - 6 }} More</h3>
+                            <p>Unlock PRO to see all</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="unlock-cta">
+                    <h3>Unlock ALL {{ total_deals_count }} Deals + Premium Features</h3>
+                    <ul class="pro-features-list">
+                        <li>✅ See all {{ total_deals_count }} mortgage deals (not just 3)</li>
+                        <li>✅ Save & track unlimited deals</li>
+                        <li>✅ Get rate change alerts by email</li>
+                        <li>✅ Side-by-side comparison tool</li>
+                        <li>✅ Remortgage reminders</li>
+                        <li>✅ Priority support from mortgage experts</li>
+                    </ul>
+                    <a href="{{ url_for('upgrade') }}" class="btn-primary btn-large">Upgrade to PRO - Only £49/year</a>
+                    <p class="money-back">30-day money-back guarantee • Cancel anytime</p>
+                </div>
+            </div>
+            {% endif %}
 
         {% else %}
             <!-- NO RESULTS -->
