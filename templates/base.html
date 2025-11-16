@@ -6,7 +6,6 @@
  
 <!-- Preload critical assets -->
 <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
-<link rel="preload" href="{{ url_for('static', filename='img/logo.png') }}" as="image">
 <link rel="preload" href="https://fonts.gstatic.com" as="font" type="font/woff2" crossorigin>
 <!-- Improve page load performance -->
 <meta http-equiv="X-DNS-Prefetch-Control" content="on">
@@ -16,16 +15,6 @@
 
 <meta http-equiv="x-ua-compatible" content="IE=edge">
 <meta name="theme-color" content="#ffffff">
-<!-- Load JS faster -->
-<script defer src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
-
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-XXXXXXX');
-</script>
-
 <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 <!-- Security & SEO Headers -->
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
@@ -45,18 +34,16 @@ gtag('config', 'G-XXXXXXX');
     <meta property="og:title" content="MortgageDealsHub – Compare the Best UK Mortgage Deals 2025">
     <meta property="og:description" content="Find the best UK mortgage rates, see the true cost including fees, and get real-time alerts when better deals appear.">
     <meta property="og:url" content="https://mortgagedealshub.co.uk">
-    <meta property="og:image" content="https://mortgagedealshub.co.uk/static/img/og-preview.png">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Compare UK Mortgage Deals | MortgageDealsHub">
     <meta name="twitter:description" content="Find your perfect UK mortgage with real-time rate alerts and fee comparisons.">
-    <meta name="twitter:image" content="https://mortgagedealshub.co.uk/static/img/og-preview.png">
 
     <meta name="keywords" content="best UK mortgage deals, compare mortgages UK, mortgage calculator, cheapest mortgage rates, remortgage deals, first time buyer mortgage, UK mortgage comparison">
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -65,14 +52,9 @@ gtag('config', 'G-XXXXXXX');
       "@type": "FinancialService",
       "name": "MortgageDealsHub",
       "url": "https://mortgagedealshub.co.uk",
-      "logo": "https://mortgagedealshub.co.uk/static/img/logo.png",
       "description": "MortgageDealsHub helps UK homebuyers find the best mortgage deals, compare true costs, and track rate changes.",
-      "sameAs": [
-        "https://www.facebook.com/MortgageDealsHub",
-        "https://www.instagram.com/mortgagedealshub",
-        "https://twitter.com/mortgagedealshub"
-      ],
-      "areaServed": { "@type": "Country", "name": "United Kingdom" }
+      "areaServed": { "@type": "Country", "name": "United Kingdom" },
+      "priceRange": "Free - £49"
     }
     </script>
 
