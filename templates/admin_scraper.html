@@ -300,6 +300,18 @@
         <div class="sources-card">
             <h2 style="margin-bottom: 1.5rem;">📊 Data Sources</h2>
 
+            <!-- Legal Warning -->
+            <div class="warning-box" style="margin-bottom: 1.5rem;">
+                <strong>⚠️ IMPORTANT LEGAL NOTICE:</strong>
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    <li>Web scraping may violate Terms of Service</li>
+                    <li>Check each website's ToS before scraping</li>
+                    <li>Commercial use may require permission</li>
+                    <li>Use at your own risk - you are responsible for compliance</li>
+                    <li>Consider using official APIs (Moneyfacts) for production</li>
+                </ul>
+            </div>
+
             <div class="source-item">
                 <div class="source-name">🏦 Individual Bank Websites</div>
                 <div class="source-status status-active">✅ Active (HSBC, Nationwide, Barclays)</div>
@@ -310,9 +322,17 @@
 
             <div class="source-item">
                 <div class="source-name">💰 MoneySuperMarket</div>
-                <div class="source-status status-planned">⚠️ Requires permission</div>
+                <div class="source-status status-active">✅ Active</div>
                 <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
-                    Comparison site with comprehensive data. Check Terms of Service before enabling.
+                    Comparison site scraper enabled. ⚠️ <strong>CHECK THEIR TERMS OF SERVICE!</strong> May require permission for commercial use.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-name">📊 MoneySavingExpert</div>
+                <div class="source-status status-active">✅ Active</div>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                    Martin Lewis's best buys scraper enabled. ⚠️ <strong>CHECK THEIR TERMS OF SERVICE!</strong> Personal use only.
                 </p>
             </div>
 
@@ -320,15 +340,7 @@
                 <div class="source-name">📈 Moneyfacts API</div>
                 <div class="source-status status-planned">💡 Recommended (requires API key)</div>
                 <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
-                    Professional mortgage data feed. Most reliable option. Add MONEYFACTS_API_KEY to environment variables.
-                </p>
-            </div>
-
-            <div class="source-item">
-                <div class="source-name">📊 MoneySavingExpert</div>
-                <div class="source-status status-planned">🔜 Planned</div>
-                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
-                    Expert mortgage guides and rates. Implementation planned for future release.
+                    Professional mortgage data feed - THE BEST OPTION! Add MONEYFACTS_API_KEY to Railway environment variables to enable.
                 </p>
             </div>
         </div>

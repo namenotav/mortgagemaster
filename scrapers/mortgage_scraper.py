@@ -81,20 +81,69 @@ class MoneySuperMarketScraper(MortgageScraper):
     def scrape(self):
         """
         Scrape MoneySuperMarket mortgage comparison page
-        NOTE: This is a simplified example - actual implementation would need
-        to handle their specific page structure and may require JavaScript rendering
+
+        ⚠️ LEGAL WARNING:
+        - Check MoneySuperMarket Terms of Service before using
+        - This site may use JavaScript rendering (requires Selenium/Playwright)
+        - Commercial use may require permission
         """
         logger.info("🔍 Scraping MoneySuperMarket...")
 
         deals = []
+        url = "https://www.moneysupermarket.com/mortgages/best-buy-tables/"
 
-        # IMPORTANT: Check their robots.txt and terms first!
-        # url = "https://www.moneysupermarket.com/mortgages/"
+        try:
+            response = self.safe_request(url, delay=3)  # Extra delay to be respectful
+            if not response:
+                logger.warning("⚠️ MoneySuperMarket request failed")
+                return deals
 
-        # For demonstration, returning sample structure
-        # In production, you'd parse the actual HTML response
+            soup = BeautifulSoup(response.content, 'html.parser')
 
-        logger.warning("⚠️ MoneySuperMarket scraping requires their permission - using demo data")
+            # Look for mortgage rate tables
+            # NOTE: Selectors may change - this is based on typical HTML structure
+            rate_rows = soup.find_all('tr', class_='mortgage-row')
+
+            if not rate_rows:
+                # Try alternative selectors
+                rate_rows = soup.find_all('div', attrs={'data-rate': True})
+
+            for row in rate_rows[:10]:  # Limit to top 10
+                try:
+                    # Try to extract data (selectors are approximate)
+                    lender_elem = row.find('td', class_='lender') or row.find('span', class_='provider-name')
+                    rate_elem = row.find('td', class_='rate') or row.find('span', class_='rate')
+                    fee_elem = row.find('td', class_='fee') or row.find('span', class_='fee')
+                    ltv_elem = row.find('td', class_='ltv') or row.find('span', class_='ltv')
+
+                    if lender_elem and rate_elem:
+                        lender = self.clean_lender_name(lender_elem.text)
+                        rate = self.extract_rate(rate_elem.text)
+                        fee = self.extract_fee(fee_elem.text) if fee_elem else 999
+                        ltv = self.extract_rate(ltv_elem.text) if ltv_elem else 75
+
+                        if lender and rate:
+                            deals.append({
+                                'lender': lender,
+                                'rate': rate,
+                                'ltv_max': ltv,
+                                'product_fee': fee,
+                                'source': 'MoneySuperMarket',
+                                'scraped_at': datetime.utcnow(),
+                                'min_loan': 25000,
+                                'max_loan': 500000,
+                            })
+                except Exception as e:
+                    logger.error(f"Error parsing MSM row: {e}")
+                    continue
+
+            if len(deals) == 0:
+                logger.warning("⚠️ MoneySuperMarket: No deals found - page structure may have changed")
+            else:
+                logger.info(f"✅ Found {len(deals)} deals from MoneySuperMarket")
+
+        except Exception as e:
+            logger.error(f"Error scraping MoneySuperMarket: {e}")
 
         return deals
 
@@ -172,6 +221,94 @@ class BankWebsiteScraper(MortgageScraper):
         return all_deals
 
 
+class MoneySavingExpertScraper(MortgageScraper):
+    """Scrape mortgage data from MoneySavingExpert"""
+
+    def scrape(self):
+        """
+        Scrape MoneySavingExpert mortgage best buys page
+
+        ⚠️ LEGAL WARNING:
+        - Check MoneySavingExpert Terms of Service
+        - Martin Lewis's site - respect their guidelines
+        - For personal use only
+        """
+        logger.info("🔍 Scraping MoneySavingExpert...")
+
+        deals = []
+        url = "https://www.moneysavingexpert.com/mortgages/best-buys/"
+
+        try:
+            response = self.safe_request(url, delay=3)  # Extra delay - be respectful
+            if not response:
+                logger.warning("⚠️ MoneySavingExpert request failed")
+                return deals
+
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # MSE typically has mortgage tables in specific sections
+            # Look for mortgage best buy tables
+            mortgage_tables = soup.find_all('table', class_='mortgage-table')
+
+            if not mortgage_tables:
+                # Try alternative structure - MSE uses different formats
+                mortgage_tables = soup.find_all('div', class_='best-buy-table')
+
+            for table in mortgage_tables[:3]:  # Usually has multiple LTV categories
+                try:
+                    rows = table.find_all('tr')[1:]  # Skip header row
+
+                    for row in rows[:5]:  # Top 5 from each table
+                        try:
+                            cells = row.find_all('td')
+                            if len(cells) >= 3:
+                                # Typical format: Lender | Rate | Fee
+                                lender_text = cells[0].text.strip()
+                                rate_text = cells[1].text.strip()
+                                fee_text = cells[2].text.strip() if len(cells) > 2 else "999"
+
+                                lender = self.clean_lender_name(lender_text)
+                                rate = self.extract_rate(rate_text)
+                                fee = self.extract_fee(fee_text)
+
+                                if lender and rate:
+                                    # Try to get LTV from table heading
+                                    ltv = 75  # Default
+                                    table_heading = table.find_previous('h3') or table.find_previous('h2')
+                                    if table_heading:
+                                        ltv_match = re.search(r'(\d+)%?\s*LTV', table_heading.text, re.IGNORECASE)
+                                        if ltv_match:
+                                            ltv = float(ltv_match.group(1))
+
+                                    deals.append({
+                                        'lender': lender,
+                                        'rate': rate,
+                                        'ltv_max': ltv,
+                                        'product_fee': fee,
+                                        'source': 'MoneySavingExpert',
+                                        'scraped_at': datetime.utcnow(),
+                                        'min_loan': 25000,
+                                        'max_loan': 500000,
+                                    })
+                        except Exception as e:
+                            logger.error(f"Error parsing MSE row: {e}")
+                            continue
+
+                except Exception as e:
+                    logger.error(f"Error parsing MSE table: {e}")
+                    continue
+
+            if len(deals) == 0:
+                logger.warning("⚠️ MoneySavingExpert: No deals found - page structure may have changed")
+            else:
+                logger.info(f"✅ Found {len(deals)} deals from MoneySavingExpert")
+
+        except Exception as e:
+            logger.error(f"Error scraping MoneySavingExpert: {e}")
+
+        return deals
+
+
 class APIBasedScraper(MortgageScraper):
     """
     Use legitimate mortgage data APIs when available
@@ -238,6 +375,15 @@ def scrape_all_sources():
         logger.info(f"✅ MoneySuperMarket: {len(msm_deals)} deals")
     except Exception as e:
         logger.error(f"❌ MoneySuperMarket scraping failed: {e}")
+
+    # 3. Try MoneySavingExpert (check terms of service!)
+    try:
+        mse_scraper = MoneySavingExpertScraper()
+        mse_deals = mse_scraper.scrape()
+        all_deals.extend(mse_deals)
+        logger.info(f"✅ MoneySavingExpert: {len(mse_deals)} deals")
+    except Exception as e:
+        logger.error(f"❌ MoneySavingExpert scraping failed: {e}")
 
     # 3. Use API-based sources (RECOMMENDED!)
     # Get API key from environment variable
