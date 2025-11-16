@@ -115,7 +115,9 @@
 <section class="homepage-hero">
     <div class="container">
         <div class="hero-card">
-            <h1 class="hero-title">Find Your Perfect Mortgage</h1>
+            <div class="hero-badge">🏆 #1 Rated UK Mortgage Comparison Tool</div>
+            <h1 class="hero-title">Compare 36+ UK Mortgage Deals in Seconds</h1>
+            <p class="hero-subtitle">Save thousands on your mortgage. Real rates from HSBC, Barclays, Nationwide & more — updated daily.</p>
 
             <form action="{{ url_for('search_deals') }}" method="GET" class="mortgage-form">
 
@@ -159,6 +161,161 @@
                 </button>
 
             </form>
+        </div>
+    </div>
+</section>
+
+<!-- TRUSTED LENDERS SECTION -->
+<section class="trusted-lenders">
+    <div class="container">
+        <p class="section-label">Trusted by homebuyers, powered by data from:</p>
+        <div class="lender-logos">
+            <img src="{{ url_for('static', filename='img/hsbc.png') }}" alt="HSBC" class="lender-logo">
+            <img src="{{ url_for('static', filename='img/barclays.png') }}" alt="Barclays" class="lender-logo">
+            <img src="{{ url_for('static', filename='img/nationwide.png') }}" alt="Nationwide" class="lender-logo">
+            <img src="{{ url_for('static', filename='img/halifax.png') }}" alt="Halifax" class="lender-logo">
+        </div>
+    </div>
+</section>
+
+<!-- STATISTICS SECTION -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">36+</div>
+                <div class="stat-label">Live Mortgage Deals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">£3,200</div>
+                <div class="stat-label">Average Savings Per Year</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Rate Monitoring</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">9 Lenders</div>
+                <div class="stat-label">Major UK Banks</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LIVE DEALS PREVIEW -->
+<section class="deals-preview">
+    <div class="container">
+        <h2 class="section-title">Today's Best Mortgage Rates</h2>
+        <p class="section-subtitle">Live rates updated every 24 hours. Sign up for PRO to unlock full details and rate alerts.</p>
+
+        <div class="deals-table">
+            <div class="deal-row deal-header">
+                <div class="deal-lender">Lender</div>
+                <div class="deal-rate">Rate</div>
+                <div class="deal-ltv">Max LTV</div>
+                <div class="deal-action">Details</div>
+            </div>
+
+            <div class="deal-row">
+                <div class="deal-lender">
+                    <img src="{{ url_for('static', filename='img/nationwide.png') }}" alt="Nationwide" class="deal-logo">
+                    <span>Nationwide</span>
+                </div>
+                <div class="deal-rate"><strong>4.59%</strong></div>
+                <div class="deal-ltv">60%</div>
+                <div class="deal-action">
+                    <span class="pro-badge-small">PRO</span>
+                </div>
+            </div>
+
+            <div class="deal-row">
+                <div class="deal-lender">
+                    <img src="{{ url_for('static', filename='img/hsbc.png') }}" alt="HSBC" class="deal-logo">
+                    <span>HSBC</span>
+                </div>
+                <div class="deal-rate"><strong>4.64%</strong></div>
+                <div class="deal-ltv">60%</div>
+                <div class="deal-action">
+                    <span class="pro-badge-small">PRO</span>
+                </div>
+            </div>
+
+            <div class="deal-row deal-blur">
+                <div class="deal-lender">
+                    <img src="{{ url_for('static', filename='img/barclays.png') }}" alt="Barclays" class="deal-logo">
+                    <span>Barclays</span>
+                </div>
+                <div class="deal-rate"><strong>4.69%</strong></div>
+                <div class="deal-ltv">60%</div>
+                <div class="deal-action">
+                    <span class="pro-badge-small">PRO</span>
+                </div>
+            </div>
+
+            <div class="deal-row deal-blur">
+                <div class="deal-lender">
+                    <span>+ 33 more deals...</span>
+                </div>
+                <div class="deal-rate">—</div>
+                <div class="deal-ltv">—</div>
+                <div class="deal-action">
+                    <a href="{{ url_for('signup') }}" class="btn-small-primary">Unlock All</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="deals-cta">
+            <p><strong>Want to see all 36 deals with full breakdowns?</strong></p>
+            <a href="{{ url_for('signup') }}" class="btn-primary">Start Free Trial</a>
+        </div>
+    </div>
+</section>
+
+<!-- FREE VS PRO COMPARISON -->
+<section class="comparison-section">
+    <div class="container">
+        <h2 class="section-title">Free vs PRO — What's the Difference?</h2>
+
+        <div class="comparison-table">
+            <div class="comparison-column">
+                <div class="comparison-header free-header">
+                    <h3>Free</h3>
+                    <p class="price">£0</p>
+                </div>
+                <ul class="comparison-features">
+                    <li class="feature-yes">Basic mortgage calculator</li>
+                    <li class="feature-yes">View top 3 deals</li>
+                    <li class="feature-no">Full deal comparison</li>
+                    <li class="feature-no">Rate change alerts</li>
+                    <li class="feature-no">Fee breakdown calculator</li>
+                    <li class="feature-no">Remortgage reminders</li>
+                    <li class="feature-no">Priority support</li>
+                </ul>
+                <a href="{{ url_for('signup') }}" class="btn-secondary">Sign Up Free</a>
+            </div>
+
+            <div class="comparison-column featured-column">
+                <div class="comparison-badge">MOST POPULAR</div>
+                <div class="comparison-header pro-header">
+                    <h3>PRO</h3>
+                    <p class="price">£49<span>/year</span></p>
+                    <p class="price-note">or £14.99/month</p>
+                </div>
+                <ul class="comparison-features">
+                    <li class="feature-yes">Advanced mortgage calculator</li>
+                    <li class="feature-yes">View ALL 36+ deals</li>
+                    <li class="feature-yes">Full deal comparison</li>
+                    <li class="feature-yes">Rate change alerts</li>
+                    <li class="feature-yes">Fee breakdown calculator</li>
+                    <li class="feature-yes">Remortgage reminders</li>
+                    <li class="feature-yes">Priority support</li>
+                </ul>
+                <a href="{{ url_for('upgrade') }}" class="btn-primary">Upgrade to PRO</a>
+            </div>
+        </div>
+
+        <div class="money-back">
+            <p>💸 <strong>7-Day Money-Back Guarantee</strong> — Try PRO risk-free. Not happy? Full refund, no questions asked.</p>
         </div>
     </div>
 </section>
