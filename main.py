@@ -647,6 +647,35 @@ def register_routes(app):
         # Get last refresh time from settings (if tracked)
         last_refresh = Settings.get('LAST_SCRAPE_TIME', 'Never')
 
+        # Get current user IP
+        if request.headers.get('X-Forwarded-For'):
+            current_ip = request.headers.get('X-Forwarded-For').split(',')[0]
+        else:
+            current_ip = request.remote_addr or 'Unknown'
+
+        # Get location info (simplified - could use IP geolocation API)
+        location_info = 'Unknown Location'
+
+        # Get last IP used for update
+        last_ip = Settings.get('LAST_UPDATE_IP', 'None')
+
+        # Get IP update history (last 5 updates)
+        update_history_json = Settings.get('UPDATE_HISTORY', '[]')
+        try:
+            import json
+            update_history = json.loads(update_history_json)[-5:]  # Last 5
+        except:
+            update_history = []
+
+        # Determine IP safety
+        ip_safety = 'safe'  # Default
+        if current_ip == last_ip:
+            ip_safety = 'warning'  # Same IP as last update
+            # Check if same IP used too many times recently
+            recent_same_ip = sum(1 for u in update_history[-3:] if u.get('ip') == current_ip)
+            if recent_same_ip >= 2:
+                ip_safety = 'blocked'  # Too many updates from same IP
+
         # Get current time for page timestamp
         current_time = datetime.utcnow().strftime('%A, %d %B %Y %H:%M:%S UTC')
 
@@ -658,13 +687,41 @@ def register_routes(app):
             'last_refresh': last_refresh
         }
 
-        return render_template('admin_scraper.html', stats=stats, current_time=current_time)
+        return render_template('admin_scraper.html',
+                             stats=stats,
+                             current_time=current_time,
+                             current_ip=current_ip,
+                             location_info=location_info,
+                             last_ip=last_ip,
+                             ip_safety=ip_safety,
+                             update_history=update_history)
 
     @app.route('/admin/refresh-deals-now', methods=['POST'])
     @csrf.exempt
     def admin_refresh_deals():
         """Manually trigger mortgage deal refresh"""
         try:
+            # Get user's IP
+            if request.headers.get('X-Forwarded-For'):
+                user_ip = request.headers.get('X-Forwarded-For').split(',')[0]
+            else:
+                user_ip = request.remote_addr or 'Unknown'
+
+            # Check IP safety before proceeding
+            last_ip = Settings.get('LAST_UPDATE_IP', 'None')
+            update_history_json = Settings.get('UPDATE_HISTORY', '[]')
+            try:
+                import json
+                update_history = json.loads(update_history_json)
+            except:
+                update_history = []
+
+            # Count recent updates from same IP
+            recent_same_ip = sum(1 for u in update_history[-3:] if u.get('ip') == user_ip)
+            if recent_same_ip >= 2 and user_ip == last_ip:
+                flash('⚠️ Too many updates from same IP! Please use different location (coffee shop, library, etc.)', 'danger')
+                return redirect(url_for('admin_scraper'))
+
             from utils.refresh_deals import refresh_deals
 
             # Run refresh in background to avoid timeout
@@ -672,11 +729,25 @@ def register_routes(app):
             thread = threading.Thread(target=refresh_deals)
             thread.start()
 
-            # Update last refresh time
-            Settings.set('LAST_SCRAPE_TIME', datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+            # Update last refresh time and IP
+            now = datetime.utcnow()
+            Settings.set('LAST_SCRAPE_TIME', now.strftime('%Y-%m-%d %H:%M:%S'))
+            Settings.set('LAST_UPDATE_IP', user_ip)
 
-            flash('✅ Deal refresh started! Check back in a few minutes.', 'success')
-            logging.info("🔄 Manual deal refresh triggered from admin panel")
+            # Add to update history
+            update_entry = {
+                'date': now.strftime('%b %d, %I:%M %p'),
+                'ip': user_ip,
+                'location': 'Unknown',  # Could use IP geolocation API
+                'deals_count': 'Processing...'
+            }
+            update_history.append(update_entry)
+            # Keep only last 10 updates
+            update_history = update_history[-10:]
+            Settings.set('UPDATE_HISTORY', json.dumps(update_history))
+
+            flash('✅ Deal refresh started! Scraping 1000+ deals from 38+ sources. Check back in 3-5 minutes.', 'success')
+            logging.info(f"🔄 Manual deal refresh triggered from IP: {user_ip}")
 
         except Exception as e:
             flash(f'❌ Error starting refresh: {str(e)}', 'danger')
