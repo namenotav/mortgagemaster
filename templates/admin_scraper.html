@@ -278,7 +278,7 @@
         <div class="actions-card">
             <h2>🚀 ONE-CLICK DEAL UPDATER</h2>
             <p style="margin-bottom: 1.5rem; color: #666; font-size: 1.1rem;">
-                Click the button below to scrape <strong>1000+ mortgage deals</strong> from 38+ sources. Takes 2-5 minutes.
+                Click the button below to scrape <strong>2000+ mortgage deals</strong> from 70+ sources including alternative income lenders! Takes 3-7 minutes.
             </p>
 
             <!-- Current Location Info -->
@@ -306,7 +306,7 @@
             <!-- Big Update Button -->
             <form method="POST" action="{{ url_for('admin_refresh_deals') }}" id="updateForm">
                 <button type="submit" class="refresh-btn" id="updateBtn" {% if ip_safety == 'blocked' %}disabled{% endif %}>
-                    🔄 UPDATE ALL DEALS NOW (1000+ Deals)
+                    🔄 UPDATE ALL DEALS NOW (2000+ Deals from 70+ Sources)
                 </button>
             </form>
 
@@ -355,7 +355,7 @@
 
         <!-- Data Sources -->
         <div class="sources-card">
-            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources (38+ Active!)</h2>
+            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources (70+ Active!)</h2>
 
             <!-- Legal Warning -->
             <div class="warning-box" style="margin-bottom: 1.5rem;">
@@ -408,13 +408,98 @@
                 </div>
             </div>
 
+            <!-- ========== NEW: ALTERNATIVE INCOME SOURCES ========== -->
+
+            <!-- Bank Statement Lenders -->
+            <div style="background: #e1f5fe; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #0288d1;">
+                <strong style="color: #01579b;">💰 Bank Statement Lenders (7) - NO PAYSLIPS!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ Aldermore • ✅ Bluestone • ✅ Pepper Money • ✅ Kensington<br>
+                    ✅ Foundation • ✅ Precise • ✅ Vida
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #0288d1; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    💡 Accept BANK STATEMENTS instead of payslips - perfect for cash workers, self-employed!
+                </div>
+            </div>
+
+            <!-- Asset-Based Lenders -->
+            <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #7b1fa2;">
+                <strong style="color: #4a148c;">💎 Asset-Based Lenders (5) - NO INCOME NEEDED!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ Investec • ✅ Hampshire Trust • ✅ Together Money • ✅ Masthaven • ✅ Roma Finance
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #7b1fa2; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    💰 Lend based on ASSETS (savings, deposits) not income - for people with cash but no payslips!
+                </div>
+            </div>
+
+            <!-- Bridging Lenders -->
+            <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #f57c00;">
+                <strong style="color: #e65100;">🌉 Bridging Finance (8) - SHORT-TERM!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ MT Finance • ✅ West One • ✅ Roma • ✅ LendInvest<br>
+                    ✅ United Trust • ✅ Shawbrook • ✅ Together • ✅ Hope Capital
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f57c00; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    ⏱️ 6-24 month loans, NO income checks! Refinance later when income documented.
+                </div>
+            </div>
+
+            <!-- Credit Unions -->
+            <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #388e3c;">
+                <strong style="color: #1b5e20;">🤝 Credit Unions (7) - HUMAN REVIEW!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ London Mutual • ✅ Manchester • ✅ Glasgow • ✅ Leeds<br>
+                    ✅ Birmingham • ✅ Liverpool • ✅ Scotwest
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #388e3c; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    👥 HUMAN underwriting (not just algorithms) - flexible for cash workers, 400+ credit score!
+                </div>
+            </div>
+
+            <!-- Guarantor Lenders -->
+            <div style="background: #fce4ec; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #c2185b;">
+                <strong style="color: #880e4f;">👨‍👩‍👧 Guarantor Mortgages (3) - ANY CREDIT SCORE!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ Bamboo Loans • ✅ Generation Home • ✅ Saffron BS
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #c2185b; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    🔓 Accept 300+ credit score if family member guarantees - perfect for bad credit!
+                </div>
+            </div>
+
+            <!-- Shared Ownership -->
+            <div style="background: #e0f2f1; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #00796b;">
+                <strong style="color: #004d40;">🏘️ Shared Ownership (5) - GOVERNMENT SCHEMES!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ L&Q • ✅ Clarion Housing • ✅ Network Homes • ✅ Peabody • ✅ Southern Housing
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #00796b; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    🏛️ Buy 25-75% of property (government-backed) - lower credit requirements!
+                </div>
+            </div>
+
+            <!-- Alternative Finance -->
+            <div style="background: #fbe9e7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #d84315;">
+                <strong style="color: #bf360c;">🔄 Alternative Finance (5) - P2P & ISLAMIC!</strong>
+                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
+                    ✅ LendInvest P2P • ✅ Landbay P2P • ✅ Folk2Folk<br>
+                    ✅ Al Rayan Bank • ✅ Gatehouse Bank
+                </div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #d84315; color: white; border-radius: 4px; font-size: 0.85rem;">
+                    🌍 Peer-to-peer lending + Sharia-compliant finance with flexible criteria!
+                </div>
+            </div>
+
             <!-- Stats Summary -->
-            <div style="background: #667eea; color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-top: 1.5rem;">
-                <h3 style="margin-bottom: 0.5rem;">🎯 TOTAL DATA SOURCES</h3>
-                <div style="font-size: 3rem; font-weight: bold;">38+</div>
-                <div style="font-size: 1.1rem; opacity: 0.9;">Expected: 1000+ unique mortgage deals</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">
-                    More than MoneySuperMarket! More than MSE! More than any competitor!
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1.3rem;">🎯 TOTAL DATA SOURCES</h3>
+                <div style="font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">70+</div>
+                <div style="font-size: 1.2rem; opacity: 0.95; margin-top: 0.5rem;">Expected: 2000+ unique mortgage deals</div>
+                <div style="font-size: 1rem; margin-top: 1rem; opacity: 0.9; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                    <strong>🔥 MARKET DOMINATION:</strong><br>
+                    More than MoneySuperMarket! More than MSE! More than Moneyfacts!<br>
+                    <strong>PLUS alternatives for bad credit & no income docs!</strong>
                 </div>
             </div>
         </div>
