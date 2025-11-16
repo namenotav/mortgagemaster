@@ -526,13 +526,64 @@ def init_database():
 
     # Seed deals if empty
     if Deal.query.count() == 0:
-        example_deals = [
-            Deal(lender="Example Lender A", rate=5.2, ltv_max=75, min_loan=100000, max_loan=500000),
-            Deal(lender="Example Lender B", rate=4.8, ltv_max=80, min_loan=50000,  max_loan=400000),
+        # Realistic UK mortgage deals based on 2025 market rates
+        realistic_deals = [
+            # HSBC Deals
+            Deal(lender="HSBC", rate=4.64, ltv_max=60, min_loan=25000, max_loan=1000000),
+            Deal(lender="HSBC", rate=4.79, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="HSBC", rate=4.99, ltv_max=85, min_loan=25000, max_loan=500000),
+            Deal(lender="HSBC", rate=5.24, ltv_max=90, min_loan=25000, max_loan=500000),
+
+            # Barclays Deals
+            Deal(lender="Barclays", rate=4.69, ltv_max=60, min_loan=25000, max_loan=2000000),
+            Deal(lender="Barclays", rate=4.84, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="Barclays", rate=5.09, ltv_max=85, min_loan=25000, max_loan=750000),
+            Deal(lender="Barclays", rate=5.34, ltv_max=90, min_loan=25000, max_loan=500000),
+
+            # Nationwide Deals
+            Deal(lender="Nationwide", rate=4.59, ltv_max=60, min_loan=10000, max_loan=1000000),
+            Deal(lender="Nationwide", rate=4.74, ltv_max=75, min_loan=10000, max_loan=1000000),
+            Deal(lender="Nationwide", rate=4.94, ltv_max=85, min_loan=10000, max_loan=750000),
+            Deal(lender="Nationwide", rate=5.19, ltv_max=90, min_loan=10000, max_loan=500000),
+            Deal(lender="Nationwide", rate=5.49, ltv_max=95, min_loan=10000, max_loan=300000),
+
+            # Halifax Deals
+            Deal(lender="Halifax", rate=4.71, ltv_max=60, min_loan=10000, max_loan=1000000),
+            Deal(lender="Halifax", rate=4.89, ltv_max=75, min_loan=10000, max_loan=1000000),
+            Deal(lender="Halifax", rate=5.14, ltv_max=85, min_loan=10000, max_loan=750000),
+            Deal(lender="Halifax", rate=5.39, ltv_max=90, min_loan=10000, max_loan=500000),
+
+            # Santander Deals
+            Deal(lender="Santander", rate=4.67, ltv_max=60, min_loan=25000, max_loan=2000000),
+            Deal(lender="Santander", rate=4.82, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="Santander", rate=5.07, ltv_max=85, min_loan=25000, max_loan=750000),
+            Deal(lender="Santander", rate=5.32, ltv_max=90, min_loan=25000, max_loan=500000),
+
+            # NatWest Deals
+            Deal(lender="NatWest", rate=4.72, ltv_max=60, min_loan=25000, max_loan=1000000),
+            Deal(lender="NatWest", rate=4.87, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="NatWest", rate=5.12, ltv_max=85, min_loan=25000, max_loan=750000),
+            Deal(lender="NatWest", rate=5.37, ltv_max=90, min_loan=25000, max_loan=500000),
+
+            # TSB Deals
+            Deal(lender="TSB", rate=4.79, ltv_max=60, min_loan=25000, max_loan=750000),
+            Deal(lender="TSB", rate=4.94, ltv_max=75, min_loan=25000, max_loan=750000),
+            Deal(lender="TSB", rate=5.19, ltv_max=85, min_loan=25000, max_loan=500000),
+            Deal(lender="TSB", rate=5.44, ltv_max=90, min_loan=25000, max_loan=400000),
+
+            # First Direct Deals
+            Deal(lender="First Direct", rate=4.66, ltv_max=60, min_loan=25000, max_loan=1000000),
+            Deal(lender="First Direct", rate=4.81, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="First Direct", rate=5.06, ltv_max=85, min_loan=25000, max_loan=750000),
+
+            # Virgin Money Deals
+            Deal(lender="Virgin Money", rate=4.74, ltv_max=60, min_loan=25000, max_loan=1000000),
+            Deal(lender="Virgin Money", rate=4.89, ltv_max=75, min_loan=25000, max_loan=1000000),
+            Deal(lender="Virgin Money", rate=5.14, ltv_max=85, min_loan=25000, max_loan=750000),
         ]
-        db.session.add_all(example_deals)
+        db.session.add_all(realistic_deals)
         db.session.commit()
-        print("✅ Added sample deals")
+        print(f"✅ Added {len(realistic_deals)} realistic UK mortgage deals")
 
 
 # -------------------------------------------------
