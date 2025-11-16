@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - MortgageDealsHub{% endblock %}
+
+{% block content %}
+<section class="search-results">
+    <div class="container">
+        <h1>Mortgage Deals for You</h1>
+
+        <div class="search-summary">
+            <p><strong>Property Value:</strong> £{{ "{:,.0f}".format(property_value) }}</p>
+            <p><strong>Deposit:</strong> £{{ "{:,.0f}".format(deposit) }}</p>
+            <p><strong>Loan Amount:</strong> £{{ "{:,.0f}".format(loan_amount) }}</p>
+            <p><strong>LTV:</strong> {{ "%.1f"|format(ltv) }}%</p>
+        </div>
+
+        {% if deals %}
+            <div class="deals-list">
+                <h2>We found {{ deals|length }} deal{% if deals|length != 1 %}s{% endif %} for you:</h2>
+                {% for deal in deals %}
+                <div class="deal-card">
+                    <h3>{{ deal.lender }}</h3>
+                    <div class="deal-rate">
+                        <span class="rate-number">{{ "%.2f"|format(deal.rate) }}%</span>
+                    </div>
+                    <div class="deal-details">
+                        <p><strong>Max LTV:</strong> {{ deal.ltv_max }}%</p>
+                        <p><strong>Loan Range:</strong> £{{ "{:,.0f}".format(deal.min_loan) }} - £{{ "{:,.0f}".format(deal.max_loan) }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <h2>No deals found</h2>
+                <p>We couldn't find any deals matching your criteria. Try adjusting your search parameters.</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">Search Again</a>
+            </div>
+        {% endif %}
+
+        <div class="cta-section">
+            <h3>Want to track these deals?</h3>
+            <p>Sign up for a free account to save and track deals, and get alerts when rates change.</p>
+            <a href="{{ url_for('signup') }}" class="btn-primary">Sign Up Free</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

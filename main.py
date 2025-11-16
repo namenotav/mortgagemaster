@@ -1,7 +1,7 @@
 # main.py
 from flask import (
     Flask, render_template, request, jsonify,
-    redirect, url_for, flash, send_from_directory
+    redirect, url_for, flash, send_from_directory, abort
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -9,12 +9,19 @@ from flask_login import (
     login_required, current_user
 )
 from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
+from email_validator import validate_email, EmailNotValidError
 import os
 import bcrypt
 import stripe
+import re
+import logging
 
 # -------------------------------------------------
 # Extensions (created once; app-bound in create_app)
@@ -22,6 +29,12 @@ import stripe
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
+csrf = CSRFProtect()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 # Ensure env vars are loaded locally (Railway uses Variables UI)
 load_dotenv()
@@ -69,10 +82,32 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
 
+    # Setup logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    )
+
     # Init extensions
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    csrf.init_app(app)
+    limiter.init_app(app)
+
+    # Security headers with Talisman (only if not in development)
+    if os.environ.get('FLASK_ENV') != 'development':
+        Talisman(app,
+            force_https=True,
+            strict_transport_security=True,
+            content_security_policy={
+                'default-src': "'self'",
+                'script-src': ["'self'", "'unsafe-inline'", "www.googletagmanager.com", "www.google-analytics.com"],
+                'style-src': ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+                'font-src': ["'self'", "fonts.gstatic.com"],
+                'img-src': ["'self'", "data:", "https:"],
+            }
+        )
 
     login_manager.login_view = 'login'
     stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
@@ -96,6 +131,37 @@ def create_app():
 
 
 # -------------------------------------------------
+# Helper Functions
+# -------------------------------------------------
+def validate_email_address(email):
+    """Validate email format"""
+    try:
+        valid = validate_email(email, check_deliverability=False)
+        return valid.normalized
+    except EmailNotValidError:
+        return None
+
+def validate_password_strength(password):
+    """Check if password meets minimum requirements"""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter"
+    if not re.search(r"[0-9]", password):
+        return False, "Password must contain at least one number"
+    return True, ""
+
+def sanitize_string(text, max_length=200):
+    """Sanitize and limit string input"""
+    if not text:
+        return ""
+    # Remove any null bytes and limit length
+    text = text.replace('\x00', '').strip()
+    return text[:max_length]
+
+# -------------------------------------------------
 # Routes
 # -------------------------------------------------
 def register_routes(app):
@@ -103,6 +169,45 @@ def register_routes(app):
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.route('/search_deals', methods=['GET'])
+    def search_deals():
+        """Search for mortgage deals based on user criteria"""
+        try:
+            # Get and validate search parameters
+            property_value = float(request.args.get('property_value', 0))
+            deposit = float(request.args.get('deposit', 0))
+            income = float(request.args.get('income', 0))
+            term = int(request.args.get('term', 5))
+
+            # Basic validation
+            if property_value <= 0 or deposit <= 0:
+                flash('Please enter valid property value and deposit.', 'warning')
+                return redirect(url_for('index'))
+
+            # Calculate LTV
+            loan_amount = property_value - deposit
+            ltv = (loan_amount / property_value) * 100
+
+            # Query deals that match criteria
+            deals = Deal.query.filter(
+                Deal.ltv_max >= ltv,
+                Deal.min_loan <= loan_amount,
+                Deal.max_loan >= loan_amount
+            ).order_by(Deal.rate.asc()).limit(20).all()
+
+            return render_template('search_results.html',
+                deals=deals,
+                property_value=property_value,
+                deposit=deposit,
+                loan_amount=loan_amount,
+                ltv=ltv,
+                income=income,
+                term=term
+            )
+        except ValueError:
+            flash('Invalid search parameters.', 'danger')
+            return redirect(url_for('index'))
 
     @app.route('/privacy')
     def privacy():
@@ -118,12 +223,20 @@ def register_routes(app):
 
     # ---------- Auth ----------
     @app.route('/login', methods=['GET', 'POST'])
+    @limiter.limit("5 per minute")  # Rate limit login attempts
     def login():
         if request.method == 'POST':
             email = request.form.get('email', '').strip().lower()
             password = request.form.get('password', '')
 
-            user = User.query.filter_by(email=email).first()
+            # Validate email format
+            validated_email = validate_email_address(email)
+            if not validated_email:
+                logging.warning(f"Failed login attempt with invalid email format: {email}")
+                flash('Invalid credentials', 'danger')
+                return render_template('login.html')
+
+            user = User.query.filter_by(email=validated_email).first()
 
             ok = False
             if user:
@@ -135,9 +248,11 @@ def register_routes(app):
 
             if ok:
                 login_user(user)
+                logging.info(f"Successful login for user: {user.email}")
                 flash('Logged in successfully.', 'success')
                 return redirect(url_for('dashboard'))
 
+            logging.warning(f"Failed login attempt for email: {validated_email}")
             flash('Invalid credentials', 'danger')
         return render_template('login.html')
 
@@ -149,23 +264,42 @@ def register_routes(app):
         return redirect(url_for('login'))
 
     @app.route('/signup', methods=['GET', 'POST'])
+    @limiter.limit("3 per hour")  # Rate limit signups
     def signup():
         if request.method == 'POST':
-            name = request.form.get('name', '').strip()
+            name = sanitize_string(request.form.get('name', ''), max_length=120)
             email = request.form.get('email', '').strip().lower()
             password = request.form.get('password', '')
+
+            # Validate all fields are present
             if not (name and email and password):
                 flash('All fields are required.', 'warning')
                 return render_template('signup.html')
 
-            if User.query.filter_by(email=email).first():
+            # Validate email format
+            validated_email = validate_email_address(email)
+            if not validated_email:
+                flash('Please enter a valid email address.', 'warning')
+                return render_template('signup.html')
+
+            # Validate password strength
+            is_strong, msg = validate_password_strength(password)
+            if not is_strong:
+                flash(msg, 'warning')
+                return render_template('signup.html')
+
+            # Check if email already exists
+            if User.query.filter_by(email=validated_email).first():
                 flash('Email already registered. Try logging in.', 'info')
                 return redirect(url_for('login'))
 
+            # Create new user
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            new_user = User(name=name, email=email, password_hash=hashed)
+            new_user = User(name=name, email=validated_email, password_hash=hashed)
             db.session.add(new_user)
             db.session.commit()
+
+            logging.info(f"New user registered: {validated_email}")
             flash('Account created successfully. Please log in.', 'success')
             return redirect(url_for('login'))
         return render_template('signup.html')
@@ -191,43 +325,98 @@ def register_routes(app):
     @app.route('/upgrade_yearly')
     @login_required
     def upgrade_yearly():
-        checkout = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{
-                "price": "price_1STXcVD2EDcoPFLNECjwrN1p",  # YOUR YEARLY PRICE
-                "quantity": 1
-            }],
-            success_url=url_for('payment_success', _external=True),
-            cancel_url=url_for('dashboard', _external=True),
-            customer_email=current_user.email
-        )
-        return redirect(checkout.url)
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_YEARLY_PRICE_ID', 'price_1STXcVD2EDcoPFLNECjwrN1p'),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (yearly)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (yearly): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
 
-    # MONTHLY PAYMENT (£4.99/month)
+    # MONTHLY PAYMENT (£14.99/month)
     @app.route('/upgrade_monthly')
     @login_required
     def upgrade_monthly():
-        checkout = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{
-                "price": "price_1STXbDD2EDcoPFLN6hEU2gS9",  # YOUR MONTHLY PRICE
-                "quantity": 1
-            }],
-            success_url=url_for('payment_success', _external=True),
-            cancel_url=url_for('dashboard', _external=True),
-            customer_email=current_user.email
-        )
-        return redirect(checkout.url)
-
-    from flask_login import current_user
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_MONTHLY_PRICE_ID', 'price_1STXbDD2EDcoPFLN6hEU2gS9'),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (monthly)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (monthly): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
 
     @app.route('/payment_success')
+    @login_required
     def payment_success():
-        if current_user.is_authenticated:
-            current_user.is_pro_member = True
-            db.session.commit()
-
+        # ⚠️ DO NOT grant access here! This is just a thank you page.
+        # Access is granted via Stripe webhook after payment is verified
+        flash('Thank you! Your payment is being processed. You will be upgraded shortly.', 'success')
         return render_template('payment_success.html')
+
+    # STRIPE WEBHOOK - This is where we ACTUALLY verify and grant access
+    @app.route('/stripe-webhook', methods=['POST'])
+    @csrf.exempt  # Stripe webhooks can't include CSRF tokens
+    def stripe_webhook():
+        payload = request.get_data()
+        sig_header = request.headers.get('Stripe-Signature')
+        webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, webhook_secret
+            )
+        except ValueError:
+            logging.error("Invalid Stripe webhook payload")
+            abort(400)
+        except stripe.error.SignatureVerificationError:
+            logging.error("Invalid Stripe webhook signature")
+            abort(400)
+
+        # Handle the checkout.session.completed event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            user_email = session.get('customer_email')
+
+            if user_email:
+                user = User.query.filter_by(email=user_email).first()
+                if user:
+                    user.is_pro_member = True
+                    db.session.commit()
+                    logging.info(f"✅ PRO access granted to {user_email} via Stripe webhook")
+                else:
+                    logging.warning(f"⚠️ Stripe payment received for unknown user: {user_email}")
+            else:
+                logging.warning("⚠️ Stripe webhook received without customer_email")
+
+        return jsonify({'status': 'success'}), 200
  
 
 
@@ -270,19 +459,26 @@ def register_routes(app):
 
     # ---------- Subscribe (from index.html form) ----------
     @app.route('/subscribe', methods=['POST'])
+    @limiter.limit("10 per hour")
     def subscribe():
         email = (request.form.get('email') or '').strip().lower()
-        if not email:
-            flash('Please enter a valid email.', 'warning')
+
+        # Validate email
+        validated_email = validate_email_address(email)
+        if not validated_email:
+            flash('Please enter a valid email address.', 'warning')
             return redirect(url_for('index'))
 
-        exists = Subscriber.query.filter_by(email=email).first()
+        # Check if already subscribed
+        exists = Subscriber.query.filter_by(email=validated_email).first()
         if exists:
             flash("You're already subscribed. 👍", 'info')
             return redirect(url_for('index'))
 
-        db.session.add(Subscriber(email=email))
+        # Add subscriber
+        db.session.add(Subscriber(email=validated_email))
         db.session.commit()
+        logging.info(f"New subscriber: {validated_email}")
         flash('Thanks! You will receive rate alerts by email.', 'success')
         return redirect(url_for('index'))
 
@@ -374,5 +570,7 @@ app = create_app()
 
 if __name__ == '__main__':
     print("🚀 MortgageDealsHub running locally")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Only enable debug mode if explicitly in development
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
 
