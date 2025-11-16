@@ -466,6 +466,17 @@ def register_routes(app):
         except Exception:
             return redirect(url_for('blog'))
 
+    # ---------- Mortgage Help & Tips ----------
+    @app.route('/mortgage-tips')
+    def mortgage_tips():
+        """Comprehensive mortgage tips and tricks for getting best deals"""
+        return render_template('mortgage_tips.html')
+
+    @app.route('/bad-credit-help')
+    def bad_credit_help():
+        """Guide for getting mortgages with bad credit"""
+        return render_template('bad_credit_help.html')
+
     # ---------- Subscribe (from index.html form) ----------
     @app.route('/subscribe', methods=['POST'])
     @limiter.limit("10 per hour")
