@@ -68,6 +68,15 @@ class Deal(db.Model):
     min_loan = db.Column(db.Float, index=True)
     max_loan = db.Column(db.Float, index=True)
 
+    # Advanced filtering fields
+    accepts_bad_credit = db.Column(db.Boolean, default=False, index=True)
+    min_credit_score = db.Column(db.Integer, default=0)  # 0 = no minimum
+    accepts_low_income = db.Column(db.Boolean, default=False, index=True)
+    min_income = db.Column(db.Float, default=0)
+    lender_type = db.Column(db.String(50), default='mainstream')  # mainstream, specialist, building_society
+    product_fee = db.Column(db.Float, default=0)
+    cashback = db.Column(db.Float, default=0)
+
 
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -508,6 +517,34 @@ def init_database():
     except Exception as e:
         print("⚠️ Column migration skipped or failed:", e)
 
+    # --- Add new Deal columns if missing ---
+    try:
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS accepts_bad_credit BOOLEAN DEFAULT FALSE"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS min_credit_score INTEGER DEFAULT 0"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS accepts_low_income BOOLEAN DEFAULT FALSE"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS min_income FLOAT DEFAULT 0"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS lender_type VARCHAR(50) DEFAULT 'mainstream'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS product_fee FLOAT DEFAULT 0"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS cashback FLOAT DEFAULT 0"
+        ))
+        db.session.commit()
+        print("✅ Deal columns ensured (bad credit, income, fees)")
+    except Exception as e:
+        print("⚠️ Deal column migration skipped:", e)
+
     # --- Existing index setup ---
     try:
         db.session.execute(db.text(
@@ -526,64 +563,121 @@ def init_database():
 
     # Seed deals if empty
     if Deal.query.count() == 0:
-        # Realistic UK mortgage deals based on 2025 market rates
-        realistic_deals = [
-            # HSBC Deals
-            Deal(lender="HSBC", rate=4.64, ltv_max=60, min_loan=25000, max_loan=1000000),
-            Deal(lender="HSBC", rate=4.79, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="HSBC", rate=4.99, ltv_max=85, min_loan=25000, max_loan=500000),
-            Deal(lender="HSBC", rate=5.24, ltv_max=90, min_loan=25000, max_loan=500000),
+        # Comprehensive UK mortgage deals including SPECIALIST LENDERS for bad credit & low income
+        all_deals = [
+            # MAINSTREAM LENDERS - Best rates, strict criteria
+            Deal(lender="HSBC", rate=4.64, ltv_max=60, min_loan=25000, max_loan=1000000,
+                 min_credit_score=700, min_income=25000, lender_type="mainstream", product_fee=999),
+            Deal(lender="HSBC", rate=4.79, ltv_max=75, min_loan=25000, max_loan=1000000,
+                 min_credit_score=680, min_income=25000, lender_type="mainstream", product_fee=999),
+            Deal(lender="HSBC", rate=4.99, ltv_max=85, min_loan=25000, max_loan=500000,
+                 min_credit_score=650, min_income=30000, lender_type="mainstream", product_fee=999),
 
-            # Barclays Deals
-            Deal(lender="Barclays", rate=4.69, ltv_max=60, min_loan=25000, max_loan=2000000),
-            Deal(lender="Barclays", rate=4.84, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="Barclays", rate=5.09, ltv_max=85, min_loan=25000, max_loan=750000),
-            Deal(lender="Barclays", rate=5.34, ltv_max=90, min_loan=25000, max_loan=500000),
+            Deal(lender="Nationwide", rate=4.59, ltv_max=60, min_loan=10000, max_loan=1000000,
+                 min_credit_score=720, min_income=20000, lender_type="building_society", product_fee=999, cashback=500),
+            Deal(lender="Nationwide", rate=4.74, ltv_max=75, min_loan=10000, max_loan=1000000,
+                 min_credit_score=680, min_income=20000, lender_type="building_society", product_fee=999),
+            Deal(lender="Nationwide", rate=4.94, ltv_max=85, min_loan=10000, max_loan=750000,
+                 min_credit_score=650, min_income=25000, lender_type="building_society", product_fee=999),
+            Deal(lender="Nationwide", rate=5.49, ltv_max=95, min_loan=10000, max_loan=300000,
+                 min_credit_score=620, min_income=30000, lender_type="building_society", product_fee=1499, accepts_low_income=True),
 
-            # Nationwide Deals
-            Deal(lender="Nationwide", rate=4.59, ltv_max=60, min_loan=10000, max_loan=1000000),
-            Deal(lender="Nationwide", rate=4.74, ltv_max=75, min_loan=10000, max_loan=1000000),
-            Deal(lender="Nationwide", rate=4.94, ltv_max=85, min_loan=10000, max_loan=750000),
-            Deal(lender="Nationwide", rate=5.19, ltv_max=90, min_loan=10000, max_loan=500000),
-            Deal(lender="Nationwide", rate=5.49, ltv_max=95, min_loan=10000, max_loan=300000),
+            Deal(lender="Barclays", rate=4.69, ltv_max=60, min_loan=25000, max_loan=2000000,
+                 min_credit_score=700, min_income=30000, lender_type="mainstream", product_fee=999),
+            Deal(lender="Barclays", rate=4.84, ltv_max=75, min_loan=25000, max_loan=1000000,
+                 min_credit_score=680, min_income=25000, lender_type="mainstream", product_fee=999),
 
-            # Halifax Deals
-            Deal(lender="Halifax", rate=4.71, ltv_max=60, min_loan=10000, max_loan=1000000),
-            Deal(lender="Halifax", rate=4.89, ltv_max=75, min_loan=10000, max_loan=1000000),
-            Deal(lender="Halifax", rate=5.14, ltv_max=85, min_loan=10000, max_loan=750000),
-            Deal(lender="Halifax", rate=5.39, ltv_max=90, min_loan=10000, max_loan=500000),
+            # SPECIALIST BAD CREDIT LENDERS - Higher rates but accept poor credit
+            Deal(lender="Pepper Money", rate=5.89, ltv_max=75, min_loan=25000, max_loan=500000,
+                 accepts_bad_credit=True, min_credit_score=400, min_income=18000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
+            Deal(lender="Pepper Money", rate=6.29, ltv_max=85, min_loan=25000, max_loan=400000,
+                 accepts_bad_credit=True, min_credit_score=350, min_income=15000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
 
-            # Santander Deals
-            Deal(lender="Santander", rate=4.67, ltv_max=60, min_loan=25000, max_loan=2000000),
-            Deal(lender="Santander", rate=4.82, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="Santander", rate=5.07, ltv_max=85, min_loan=25000, max_loan=750000),
-            Deal(lender="Santander", rate=5.32, ltv_max=90, min_loan=25000, max_loan=500000),
+            Deal(lender="Bluestone Mortgages", rate=6.19, ltv_max=75, min_loan=25000, max_loan=500000,
+                 accepts_bad_credit=True, min_credit_score=380, min_income=18000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
+            Deal(lender="Bluestone Mortgages", rate=6.59, ltv_max=85, min_loan=25000, max_loan=400000,
+                 accepts_bad_credit=True, min_credit_score=350, min_income=15000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
 
-            # NatWest Deals
-            Deal(lender="NatWest", rate=4.72, ltv_max=60, min_loan=25000, max_loan=1000000),
-            Deal(lender="NatWest", rate=4.87, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="NatWest", rate=5.12, ltv_max=85, min_loan=25000, max_loan=750000),
-            Deal(lender="NatWest", rate=5.37, ltv_max=90, min_loan=25000, max_loan=500000),
+            Deal(lender="Vida Homeloans", rate=5.99, ltv_max=70, min_loan=25000, max_loan=500000,
+                 accepts_bad_credit=True, min_credit_score=420, min_income=20000, lender_type="specialist",
+                 product_fee=1495, accepts_low_income=True),
+            Deal(lender="Vida Homeloans", rate=6.49, ltv_max=80, min_loan=25000, max_loan=400000,
+                 accepts_bad_credit=True, min_credit_score=380, min_income=18000, lender_type="specialist",
+                 product_fee=1495, accepts_low_income=True),
 
-            # TSB Deals
-            Deal(lender="TSB", rate=4.79, ltv_max=60, min_loan=25000, max_loan=750000),
-            Deal(lender="TSB", rate=4.94, ltv_max=75, min_loan=25000, max_loan=750000),
-            Deal(lender="TSB", rate=5.19, ltv_max=85, min_loan=25000, max_loan=500000),
-            Deal(lender="TSB", rate=5.44, ltv_max=90, min_loan=25000, max_loan=400000),
+            Deal(lender="Kensington Mortgages", rate=5.79, ltv_max=75, min_loan=50000, max_loan=1000000,
+                 accepts_bad_credit=True, min_credit_score=450, min_income=25000, lender_type="specialist",
+                 product_fee=1999, accepts_low_income=True),
+            Deal(lender="Kensington Mortgages", rate=6.19, ltv_max=85, min_loan=50000, max_loan=750000,
+                 accepts_bad_credit=True, min_credit_score=400, min_income=20000, lender_type="specialist",
+                 product_fee=1999, accepts_low_income=True),
 
-            # First Direct Deals
-            Deal(lender="First Direct", rate=4.66, ltv_max=60, min_loan=25000, max_loan=1000000),
-            Deal(lender="First Direct", rate=4.81, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="First Direct", rate=5.06, ltv_max=85, min_loan=25000, max_loan=750000),
+            Deal(lender="Together Money", rate=6.39, ltv_max=75, min_loan=10000, max_loan=500000,
+                 accepts_bad_credit=True, min_credit_score=350, min_income=12000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
+            Deal(lender="Together Money", rate=6.89, ltv_max=85, min_loan=10000, max_loan=400000,
+                 accepts_bad_credit=True, min_credit_score=300, min_income=10000, lender_type="specialist",
+                 product_fee=1995, accepts_low_income=True),
 
-            # Virgin Money Deals
-            Deal(lender="Virgin Money", rate=4.74, ltv_max=60, min_loan=25000, max_loan=1000000),
-            Deal(lender="Virgin Money", rate=4.89, ltv_max=75, min_loan=25000, max_loan=1000000),
-            Deal(lender="Virgin Money", rate=5.14, ltv_max=85, min_loan=25000, max_loan=750000),
+            # LOW INCOME SPECIALISTS - Accept lower incomes
+            Deal(lender="Foundation Home Loans", rate=5.69, ltv_max=75, min_loan=25000, max_loan=500000,
+                 accepts_bad_credit=True, min_credit_score=420, min_income=15000, lender_type="specialist",
+                 product_fee=1495, accepts_low_income=True),
+
+            Deal(lender="Aldermore", rate=5.49, ltv_max=70, min_loan=25000, max_loan=750000,
+                 accepts_bad_credit=True, min_credit_score=480, min_income=18000, lender_type="specialist",
+                 product_fee=1295, accepts_low_income=True),
+            Deal(lender="Aldermore", rate=5.99, ltv_max=80, min_loan=25000, max_loan=600000,
+                 accepts_bad_credit=True, min_credit_score=450, min_income=16000, lender_type="specialist",
+                 product_fee=1295, accepts_low_income=True),
+
+            # BUILDING SOCIETIES - Often more flexible
+            Deal(lender="Coventry Building Society", rate=4.89, ltv_max=75, min_loan=10000, max_loan=500000,
+                 min_credit_score=620, min_income=18000, lender_type="building_society",
+                 product_fee=999, accepts_low_income=True),
+            Deal(lender="Coventry Building Society", rate=5.19, ltv_max=85, min_loan=10000, max_loan=400000,
+                 min_credit_score=600, min_income=20000, lender_type="building_society",
+                 product_fee=999, accepts_low_income=True),
+
+            Deal(lender="Yorkshire Building Society", rate=4.94, ltv_max=75, min_loan=10000, max_loan=500000,
+                 min_credit_score=640, min_income=18000, lender_type="building_society",
+                 product_fee=995, accepts_low_income=True),
+            Deal(lender="Yorkshire Building Society", rate=5.24, ltv_max=85, min_loan=10000, max_loan=400000,
+                 min_credit_score=620, min_income=20000, lender_type="building_society",
+                 product_fee=995, accepts_low_income=True),
+
+            Deal(lender="Skipton Building Society", rate=4.99, ltv_max=75, min_loan=10000, max_loan=500000,
+                 min_credit_score=630, min_income=17000, lender_type="building_society",
+                 product_fee=995, accepts_low_income=True),
+            Deal(lender="Skipton Building Society", rate=5.29, ltv_max=85, min_loan=10000, max_loan=400000,
+                 min_credit_score=610, min_income=19000, lender_type="building_society",
+                 product_fee=995, accepts_low_income=True),
+
+            # Additional mainstream for variety
+            Deal(lender="Halifax", rate=4.71, ltv_max=60, min_loan=10000, max_loan=1000000,
+                 min_credit_score=700, min_income=22000, lender_type="mainstream", product_fee=999),
+            Deal(lender="Halifax", rate=4.89, ltv_max=75, min_loan=10000, max_loan=1000000,
+                 min_credit_score=670, min_income=22000, lender_type="mainstream", product_fee=999),
+            Deal(lender="Halifax", rate=5.14, ltv_max=85, min_loan=10000, max_loan=750000,
+                 min_credit_score=640, min_income=25000, lender_type="mainstream", product_fee=999),
+
+            Deal(lender="Santander", rate=4.67, ltv_max=60, min_loan=25000, max_loan=2000000,
+                 min_credit_score=710, min_income=28000, lender_type="mainstream", product_fee=999),
+            Deal(lender="Santander", rate=4.82, ltv_max=75, min_loan=25000, max_loan=1000000,
+                 min_credit_score=680, min_income=25000, lender_type="mainstream", product_fee=999),
+
+            Deal(lender="NatWest", rate=4.72, ltv_max=60, min_loan=25000, max_loan=1000000,
+                 min_credit_score=700, min_income=25000, lender_type="mainstream", product_fee=999),
+            Deal(lender="NatWest", rate=4.87, ltv_max=75, min_loan=25000, max_loan=1000000,
+                 min_credit_score=670, min_income=23000, lender_type="mainstream", product_fee=999),
         ]
-        db.session.add_all(realistic_deals)
+        db.session.add_all(all_deals)
         db.session.commit()
-        print(f"✅ Added {len(realistic_deals)} realistic UK mortgage deals")
+        print(f"✅ Added {len(all_deals)} mortgage deals (mainstream + specialist bad credit & low income lenders)")
 
 
 # -------------------------------------------------
