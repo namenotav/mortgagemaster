@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Scraper Dashboard - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .actions-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .actions-card h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .info-box h3 {
+            color: #1565c0;
+            margin-bottom: 1rem;
+        }
+
+        .info-box ul {
+            color: #424242;
+            margin-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .last-refresh {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .last-refresh strong {
+            color: #667eea;
+        }
+
+        .flash-message {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .flash-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .sources-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .source-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .source-item:last-child {
+            border-bottom: none;
+        }
+
+        .source-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .source-status {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            color: #28a745;
+        }
+
+        .status-planned {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="header">
+            <h1>🔄 Data Scraper Dashboard</h1>
+            <p class="subtitle">Monitor and manage live mortgage data extraction</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_deals }}</div>
+                <div class="stat-label">Total Deals</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.mainstream }}</div>
+                <div class="stat-label">Mainstream Lenders</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.specialist }}</div>
+                <div class="stat-label">Specialist Lenders</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.building_society }}</div>
+                <div class="stat-label">Building Societies</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-card">
+            <h2>Manual Refresh</h2>
+            <p style="margin-bottom: 1.5rem; color: #666;">
+                Click below to manually scrape mortgage data from all configured sources. This may take 1-2 minutes.
+            </p>
+
+            <form method="POST" action="{{ url_for('admin_refresh_deals') }}">
+                <button type="submit" class="refresh-btn">
+                    🔄 Refresh Deals Now
+                </button>
+            </form>
+
+            <div class="last-refresh">
+                <strong>Last Refresh:</strong> {{ stats.last_refresh }}
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Note:</strong> Automatic refreshes run daily at 3:00 AM UK time. Manual refresh should only be used for testing or urgent updates.
+            </div>
+        </div>
+
+        <!-- Data Sources -->
+        <div class="sources-card">
+            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources</h2>
+
+            <div class="source-item">
+                <div class="source-name">🏦 Individual Bank Websites</div>
+                <div class="source-status status-active">✅ Active (HSBC, Nationwide, Barclays)</div>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                    Scrapes rates directly from bank websites. May require maintenance if site structures change.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-name">💰 MoneySuperMarket</div>
+                <div class="source-status status-planned">⚠️ Requires permission</div>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                    Comparison site with comprehensive data. Check Terms of Service before enabling.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-name">📈 Moneyfacts API</div>
+                <div class="source-status status-planned">💡 Recommended (requires API key)</div>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                    Professional mortgage data feed. Most reliable option. Add MONEYFACTS_API_KEY to environment variables.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-name">📊 MoneySavingExpert</div>
+                <div class="source-status status-planned">🔜 Planned</div>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                    Expert mortgage guides and rates. Implementation planned for future release.
+                </p>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3>ℹ️ How Data Scraping Works</h3>
+            <ul>
+                <li><strong>Automatic Updates:</strong> Scraper runs daily at 3 AM to fetch fresh deals</li>
+                <li><strong>Multiple Sources:</strong> Data from bank websites, comparison sites, and APIs</li>
+                <li><strong>Validation:</strong> All scraped data is validated and deduplicated before saving</li>
+                <li><strong>Fallback:</strong> If scraping fails, existing data is preserved</li>
+                <li><strong>Rate Limiting:</strong> Built-in delays to respect website policies</li>
+            </ul>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="back-link">← Back to Homepage</a>
+        <span style="color: white; margin: 0 1rem;">|</span>
+        <a href="{{ url_for('admin_control') }}" class="back-link">🎛️ Gatekeeper Dashboard</a>
+    </div>
+</body>
+</html>

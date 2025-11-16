@@ -633,6 +633,54 @@ def register_routes(app):
         logging.info(f"🎛️ DEMO_MODE toggled to {new_value}")
         return redirect(url_for('admin_control'))
 
+    # ---------- Admin Data Scraper Dashboard ----------
+    @app.route('/secret-admin-scraper-xyz')
+    def admin_scraper():
+        """Admin dashboard for monitoring data scraping"""
+        total_deals = Deal.query.count()
+
+        # Get deal statistics
+        mainstream_count = Deal.query.filter_by(lender_type='mainstream').count()
+        specialist_count = Deal.query.filter_by(lender_type='specialist').count()
+        building_society_count = Deal.query.filter_by(lender_type='building_society').count()
+
+        # Get last refresh time from settings (if tracked)
+        last_refresh = Settings.get('LAST_SCRAPE_TIME', 'Never')
+
+        stats = {
+            'total_deals': total_deals,
+            'mainstream': mainstream_count,
+            'specialist': specialist_count,
+            'building_society': building_society_count,
+            'last_refresh': last_refresh
+        }
+
+        return render_template('admin_scraper.html', stats=stats)
+
+    @app.route('/admin/refresh-deals-now', methods=['POST'])
+    @csrf.exempt
+    def admin_refresh_deals():
+        """Manually trigger mortgage deal refresh"""
+        try:
+            from utils.refresh_deals import refresh_deals
+
+            # Run refresh in background to avoid timeout
+            import threading
+            thread = threading.Thread(target=refresh_deals)
+            thread.start()
+
+            # Update last refresh time
+            Settings.set('LAST_SCRAPE_TIME', datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+
+            flash('✅ Deal refresh started! Check back in a few minutes.', 'success')
+            logging.info("🔄 Manual deal refresh triggered from admin panel")
+
+        except Exception as e:
+            flash(f'❌ Error starting refresh: {str(e)}', 'danger')
+            logging.error(f"Error in manual refresh: {e}")
+
+        return redirect(url_for('admin_scraper'))
+
     # ---------- Error pages ----------
     @app.errorhandler(404)
     def not_found(e):
@@ -837,14 +885,21 @@ def start_scheduler_if_enabled(app):
     try:
         scheduler = BackgroundScheduler()
         try:
-            # optional: only if you actually have this util
-            from app.utils.refresh_deals import refresh_deals
-            scheduler.add_job(func=refresh_deals, trigger="interval", hours=24)
-        except Exception as e:
+            # Import mortgage deal refresh function
+            from utils.refresh_deals import refresh_deals
+            # Run daily at 3 AM UK time
+            scheduler.add_job(
+                func=refresh_deals,
+                trigger="cron",
+                hour=3,
+                minute=0,
+                id='daily_mortgage_refresh'
+            )
+            print("✅ Daily mortgage deal refresh scheduler started (runs at 3 AM)")
+        except ImportError as e:
             # No-op if the module isn't present
             print("⚠️ refresh_deals not wired or import failed:", e)
         scheduler.start()
-        print("✅ Daily mortgage deal refresh scheduler started!")
     except Exception as e:
         print("⚠️ Scheduler error:", e)
 
