@@ -138,7 +138,8 @@
     <div class="container">
       <p>&copy; 2025 MortgageDealsHub. All rights reserved.
         <a href="{{ url_for('privacy') }}">Privacy</a> ·
-        <a href="{{ url_for('terms') }}">Terms</a>
+        <a href="{{ url_for('terms') }}">Terms</a> ·
+        <a href="#" onclick="openGlossary(); return false;">📖 Mortgage Terms</a>
       </p>
     </div>
 
@@ -153,5 +154,209 @@
       </div>
     </section>
   </footer>
+
+  <!-- Floating Help Button -->
+  <button class="floating-help-btn" onclick="openGlossary()" title="Explain Mortgage Terms">
+    <span class="help-icon">?</span>
+    <span class="help-text">Help</span>
+  </button>
+
+  <!-- Glossary Modal -->
+  <div id="glossaryModal" class="glossary-modal">
+    <div class="glossary-content">
+      <div class="glossary-header">
+        <h2>📖 Mortgage Terms Explained Simply</h2>
+        <button class="close-glossary" onclick="closeGlossary()">&times;</button>
+      </div>
+
+      <div class="glossary-body">
+        <div class="glossary-search">
+          <input type="text" id="glossarySearch" placeholder="🔍 Search for a term..." onkeyup="filterGlossary()">
+        </div>
+
+        <div class="glossary-terms" id="glossaryTerms">
+          <div class="glossary-term" data-term="ltv">
+            <h3>LTV (Loan-to-Value)</h3>
+            <p><strong>What it is:</strong> How much you're borrowing compared to the property's value.</p>
+            <p><strong>How it works:</strong> LTV = (Loan Amount ÷ Property Value) × 100</p>
+            <p><strong>Example:</strong> £200,000 house, £40,000 deposit = £160,000 loan = 80% LTV</p>
+            <p><strong>Why it matters:</strong> Lower LTV = Better interest rates! Banks prefer you to have a bigger deposit.</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> If LTV is 80%, you're borrowing 80p for every £1 the house is worth.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="interest rate">
+            <h3>Interest Rate</h3>
+            <p><strong>What it is:</strong> The yearly cost of borrowing money, shown as a percentage.</p>
+            <p><strong>Example:</strong> 4.5% rate on £150,000 = You pay £6,750 in interest per year</p>
+            <p><strong>Why it matters:</strong> Even 0.5% difference = thousands of pounds over 25 years!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Think of it as the "rental fee" for borrowing the bank's money.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="monthly payment">
+            <h3>Monthly Payment</h3>
+            <p><strong>What it is:</strong> The amount you pay to the bank every month.</p>
+            <p><strong>What's included:</strong> Part goes to paying back the loan, part goes to interest.</p>
+            <p><strong>Why it matters:</strong> This is what comes out of your bank account each month!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Like rent, but you're buying the house bit by bit.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="true cost">
+            <h3>TRUE Cost</h3>
+            <p><strong>What it is:</strong> The REAL total amount you'll pay over the full mortgage term.</p>
+            <p><strong>What's included:</strong> All interest + product fees + booking fees - cashback</p>
+            <p><strong>Example:</strong> £150,000 loan might actually cost £220,000 over 25 years!</p>
+            <p><strong>Why it matters:</strong> The cheapest rate isn't always the cheapest total cost!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> This shows the FULL price tag, not just the advertised rate.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="product fee">
+            <h3>Product Fee (Arrangement Fee)</h3>
+            <p><strong>What it is:</strong> A one-time fee the bank charges to set up your mortgage.</p>
+            <p><strong>Typical range:</strong> £0 - £2,000</p>
+            <p><strong>When you pay:</strong> Usually added to the loan or paid upfront</p>
+            <p><strong>Why it matters:</strong> A low rate with a £2,000 fee might cost MORE than a higher rate with no fee!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> The bank's "setup charge" - like a booking fee.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="credit score">
+            <h3>Credit Score</h3>
+            <p><strong>What it is:</strong> A number (300-850) that shows how reliable you are at repaying debt.</p>
+            <p><strong>Ranges:</strong></p>
+            <ul>
+              <li>720-850 = Excellent (best rates)</li>
+              <li>680-719 = Good</li>
+              <li>620-679 = Fair</li>
+              <li>580-619 = Poor</li>
+              <li>300-579 = Very Poor (specialist lenders only)</li>
+            </ul>
+            <p><strong>Why it matters:</strong> Better score = Lower rates = Save thousands!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Your financial report card that banks check before lending.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="bad credit">
+            <h3>Bad Credit</h3>
+            <p><strong>What it is:</strong> A history of missed payments, defaults, CCJs, or bankruptcy.</p>
+            <p><strong>What counts as bad credit:</strong></p>
+            <ul>
+              <li>Missed payments (credit cards, loans, bills)</li>
+              <li>CCJs (County Court Judgements)</li>
+              <li>Defaults or IVAs</li>
+              <li>Bankruptcy or repossession</li>
+            </ul>
+            <p><strong>Good news:</strong> Specialist lenders WILL lend to you (we list 12 of them!)</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Past money troubles - but you can still get a mortgage!
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="specialist lender">
+            <h3>Specialist Lender</h3>
+            <p><strong>What it is:</strong> Banks that lend to people with bad credit or unusual situations.</p>
+            <p><strong>Examples:</strong> Pepper Money, Bluestone, Kensington, Together Money</p>
+            <p><strong>Rates:</strong> Usually 5.5%-7% (vs 4.5%-5% for mainstream)</p>
+            <p><strong>Why it matters:</strong> They say YES when big banks say NO!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> The helpful banks that give people a second chance.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="fixed rate">
+            <h3>Fixed Rate Mortgage</h3>
+            <p><strong>What it is:</strong> Your interest rate stays the same for a set period (usually 2-5 years).</p>
+            <p><strong>Pros:</strong> Payments never change - easy to budget!</p>
+            <p><strong>Cons:</strong> Might miss out if rates drop</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Like a contract - your rate is locked in and won't go up.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="deposit">
+            <h3>Deposit</h3>
+            <p><strong>What it is:</strong> The chunk of money you pay upfront to buy the house.</p>
+            <p><strong>Minimum:</strong> Usually 5% (but bigger = better rates)</p>
+            <p><strong>Example:</strong> £200,000 house needs £10,000 minimum (5%)</p>
+            <p><strong>Why it matters:</strong> Bigger deposit = Lower LTV = Cheaper mortgage!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Your skin in the game - shows banks you're serious.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="term">
+            <h3>Mortgage Term</h3>
+            <p><strong>What it is:</strong> How long you take to pay back the loan (in years).</p>
+            <p><strong>Common terms:</strong> 25, 30, or 35 years</p>
+            <p><strong>Shorter term:</strong> Higher monthly payments BUT less interest overall</p>
+            <p><strong>Longer term:</strong> Lower monthly payments BUT more interest overall</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Like choosing monthly vs yearly Netflix - longer = smaller payments but costs more in the end.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="cashback">
+            <h3>Cashback</h3>
+            <p><strong>What it is:</strong> Free money the bank gives you for taking their mortgage!</p>
+            <p><strong>Typical amount:</strong> £0 - £500</p>
+            <p><strong>The catch:</strong> Usually comes with slightly higher rates</p>
+            <p><strong>Why it matters:</strong> Can help pay for moving costs or solicitor fees</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> A welcome bonus for choosing that lender.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="income">
+            <h3>Minimum Income</h3>
+            <p><strong>What it is:</strong> The least amount you need to earn per year to qualify.</p>
+            <p><strong>Mainstream banks:</strong> Usually £20,000 - £30,000+</p>
+            <p><strong>Specialist lenders:</strong> Some accept £10,000+</p>
+            <p><strong>Why it matters:</strong> Banks want to make sure you can afford the payments!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Proof you earn enough to pay the mortgage each month.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="total interest">
+            <h3>Total Interest</h3>
+            <p><strong>What it is:</strong> ALL the interest you'll pay over the full mortgage term.</p>
+            <p><strong>Example:</strong> Borrow £150,000, pay back £250,000 = £100,000 in interest!</p>
+            <p><strong>Why it matters:</strong> This is where banks make their money!</p>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> The total "rental fee" for borrowing the bank's money.
+            </div>
+          </div>
+
+          <div class="glossary-term" data-term="lender">
+            <h3>Lender</h3>
+            <p><strong>What it is:</strong> The bank or building society giving you the mortgage.</p>
+            <p><strong>Types:</strong></p>
+            <ul>
+              <li><strong>Mainstream:</strong> HSBC, Barclays, Santander (strict, best rates)</li>
+              <li><strong>Building Societies:</strong> Nationwide, Coventry (more flexible)</li>
+              <li><strong>Specialist:</strong> Pepper Money, Bluestone (accept bad credit)</li>
+            </ul>
+            <div class="glossary-example">
+              <strong>💡 Simple version:</strong> Who you're borrowing money from.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glossary-footer">
+        <p>💡 <strong>Still confused?</strong> Email us at support@mortgagedealshub.co.uk</p>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -120,3 +120,58 @@ function toggleAdvanced() {
         icon.textContent = '▼';
     }
 }
+
+// ========================================
+// GLOSSARY MODAL FUNCTIONS
+// ========================================
+
+// Open glossary modal
+function openGlossary() {
+    const modal = document.getElementById('glossaryModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+}
+
+// Close glossary modal
+function closeGlossary() {
+    const modal = document.getElementById('glossaryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+}
+
+// Close modal when clicking outside the content
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('glossaryModal');
+    if (event.target === modal) {
+        closeGlossary();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeGlossary();
+    }
+});
+
+// Filter glossary terms by search
+function filterGlossary() {
+    const searchInput = document.getElementById('glossarySearch');
+    const searchTerm = searchInput.value.toLowerCase();
+    const terms = document.querySelectorAll('.glossary-term');
+
+    terms.forEach(term => {
+        const termName = term.dataset.term.toLowerCase();
+        const termText = term.textContent.toLowerCase();
+
+        if (termName.includes(searchTerm) || termText.includes(searchTerm)) {
+            term.style.display = 'block';
+        } else {
+            term.style.display = 'none';
+        }
+    });
+}
