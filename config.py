@@ -67,8 +67,8 @@ class Config:
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET') or 'whsec_your_secret'
 
     # Stripe Price IDs (set these in environment variables for production)
-    STRIPE_YEARLY_PRICE_ID = os.environ.get('STRIPE_YEARLY_PRICE_ID') or 'price_1STXcVD2EDcoPFLNECjwrN1p'
-    STRIPE_MONTHLY_PRICE_ID = os.environ.get('STRIPE_MONTHLY_PRICE_ID') or 'price_1STXbDD2EDcoPFLN6hEU2gS9'
+    STRIPE_YEARLY_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PLUS_PRICE_ID') or 'price_1STXcVD2EDcoPFLNECjwrN1p'
+    STRIPE_MONTHLY_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PRICE_ID') or 'price_1STXbDD2EDcoPFLN6hEU2gS9'
 
     # Pricing (in pence)
     PRO_ONETIME_PRICE = 4999  # £49.99
