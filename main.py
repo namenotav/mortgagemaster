@@ -54,38 +54,8 @@ class User(db.Model, UserMixin):
 
     is_pro_member = db.Column(db.Boolean, default=False)
 
-    # NEW: Subscription fields (added by migration script)
-    stripe_customer_id = db.Column(db.String(255))
-    subscription_tier = db.Column(db.String(50), default='free')  # free, premium, premium_plus
-    subscription_status = db.Column(db.String(50), default='inactive')  # active, canceled, expired
-    stripe_subscription_id = db.Column(db.String(255))
-    subscription_start_date = db.Column(db.DateTime)
-    subscription_end_date = db.Column(db.DateTime)
-
     def is_pro(self):
         return bool(self.is_pro_member)
-
-    # NEW: Subscription tier checks
-    def is_premium(self):
-        """Check if user has Premium tier (£19.99/month) or higher"""
-        return self.subscription_tier in ['premium', 'premium_plus'] and self.subscription_status == 'active'
-
-    def is_premium_plus(self):
-        """Check if user has Premium+ tier (£49.99/month)"""
-        return self.subscription_tier == 'premium_plus' and self.subscription_status == 'active'
-
-    def is_free_tier(self):
-        """Check if user is on free tier"""
-        return self.subscription_tier == 'free' or self.subscription_status != 'active'
-
-    def get_subscription_display_name(self):
-        """Get friendly name for subscription tier"""
-        tier_names = {
-            'free': 'Free',
-            'premium': 'Premium (£19.99/month)',
-            'premium_plus': 'Premium+ (£49.99/month)'
-        }
-        return tier_names.get(self.subscription_tier, 'Free')
 
 
 
@@ -326,25 +296,20 @@ def register_routes(app):
             # Sort by TRUE cost (best deals first)
             deals_with_cost.sort(key=lambda x: x['true_cost'])
 
-            # 🎛️ GATEKEEPER: Check DEMO_MODE and subscription tier
+            # 🎛️ GATEKEEPER: Check DEMO_MODE and user status
             demo_mode = Settings.is_demo_mode()
-
-            # Check subscription tier (NEW subscription system)
-            is_premium_user = current_user.is_authenticated and current_user.is_premium()
-
-            # Also check old is_pro_member for backward compatibility
             is_pro_user = current_user.is_authenticated and current_user.is_pro()
 
             # Determine if we should limit results
-            should_limit = not demo_mode and not is_premium_user and not is_pro_user
+            should_limit = not demo_mode and not is_pro_user
 
             # Store all deals for template reference
             all_deals = deals_with_cost
 
-            # NEW: Free users see 10 deals (was 3), Premium users see ALL
+            # If limiting, only show top 3
             if should_limit:
-                visible_deals = deals_with_cost[:10]  # Show 10 instead of 3
-                locked_deals = deals_with_cost[10:]
+                visible_deals = deals_with_cost[:3]
+                locked_deals = deals_with_cost[3:]
             else:
                 visible_deals = deals_with_cost
                 locked_deals = []
@@ -477,76 +442,59 @@ def register_routes(app):
     @app.route('/upgrade')
     @login_required
     def upgrade():
-        return render_template('upgrade.html', user=current_user)
+        return render_template('upgrade.html')
 
-    # PREMIUM TIER - £19.99/MONTH
-    @app.route('/upgrade_premium')
-    @login_required
-    def upgrade_premium():
-        try:
-            checkout = stripe.checkout.Session.create(
-                mode="subscription",
-                line_items=[{
-                    "price": app.config.get('STRIPE_PREMIUM_PRICE_ID', 'price_premium_19_99'),
-                    "quantity": 1
-                }],
-                success_url=url_for('payment_success', _external=True),
-                cancel_url=url_for('dashboard', _external=True),
-                customer_email=current_user.email,
-                metadata={
-                    'user_id': current_user.id,
-                    'user_email': current_user.email,
-                    'tier': 'premium'
-                }
-            )
-            logging.info(f"Stripe checkout session created for user {current_user.email} (Premium £19.99)")
-            return redirect(checkout.url)
-        except Exception as e:
-            logging.error(f"Stripe checkout error (Premium): {str(e)}")
-            flash('Payment system error. Please try again later.', 'danger')
-            return redirect(url_for('upgrade'))
-
-    # PREMIUM+ TIER - £49.99/MONTH
-    @app.route('/upgrade_premium_plus')
-    @login_required
-    def upgrade_premium_plus():
-        try:
-            checkout = stripe.checkout.Session.create(
-                mode="subscription",
-                line_items=[{
-                    "price": app.config.get('STRIPE_PREMIUM_PLUS_PRICE_ID', 'price_premium_plus_49_99'),
-                    "quantity": 1
-                }],
-                success_url=url_for('payment_success', _external=True),
-                cancel_url=url_for('dashboard', _external=True),
-                customer_email=current_user.email,
-                metadata={
-                    'user_id': current_user.id,
-                    'user_email': current_user.email,
-                    'tier': 'premium_plus'
-                }
-            )
-            logging.info(f"Stripe checkout session created for user {current_user.email} (Premium+ £49.99)")
-            return redirect(checkout.url)
-        except Exception as e:
-            logging.error(f"Stripe checkout error (Premium+): {str(e)}")
-            flash('Payment system error. Please try again later.', 'danger')
-            return redirect(url_for('upgrade'))
-
-    # LEGACY: Keep old routes for backward compatibility (redirect to new pricing)
+    # YEARLY PAYMENT (£49/year)
     @app.route('/upgrade_yearly')
     @login_required
     def upgrade_yearly():
-        """LEGACY: Redirect to Premium+ tier"""
-        flash('We have new pricing! Premium+ is now £49.99/month instead of yearly.', 'info')
-        return redirect(url_for('upgrade_premium_plus'))
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_YEARLY_PRICE_ID', 'price_1STXcVD2EDcoPFLNECjwrN1p'),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (yearly)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (yearly): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
 
+    # MONTHLY PAYMENT (£14.99/month)
     @app.route('/upgrade_monthly')
     @login_required
     def upgrade_monthly():
-        """LEGACY: Redirect to Premium tier"""
-        flash('We have new pricing! Premium is now £19.99/month.', 'info')
-        return redirect(url_for('upgrade_premium'))
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_MONTHLY_PRICE_ID', 'price_1STXbDD2EDcoPFLN6hEU2gS9'),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (monthly)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (monthly): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
 
     @app.route('/payment_success')
     @login_required
@@ -579,55 +527,17 @@ def register_routes(app):
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
             user_email = session.get('customer_email')
-            metadata = session.get('metadata', {})
-            tier = metadata.get('tier', 'premium')  # Default to premium if not specified
 
             if user_email:
                 user = User.query.filter_by(email=user_email).first()
                 if user:
-                    # Update subscription info
-                    user.subscription_tier = tier
-                    user.subscription_status = 'active'
-                    user.stripe_customer_id = session.get('customer')
-                    user.stripe_subscription_id = session.get('subscription')
-                    user.subscription_start_date = datetime.utcnow()
-
-                    # Also set is_pro_member for backward compatibility
                     user.is_pro_member = True
-
                     db.session.commit()
-                    logging.info(f"✅ {tier.upper()} access granted to {user_email} via Stripe webhook")
+                    logging.info(f"✅ PRO access granted to {user_email} via Stripe webhook")
                 else:
                     logging.warning(f"⚠️ Stripe payment received for unknown user: {user_email}")
             else:
                 logging.warning("⚠️ Stripe webhook received without customer_email")
-
-        # Handle subscription canceled/updated events
-        elif event['type'] == 'customer.subscription.deleted':
-            subscription = event['data']['object']
-            stripe_sub_id = subscription['id']
-
-            user = User.query.filter_by(stripe_subscription_id=stripe_sub_id).first()
-            if user:
-                user.subscription_status = 'canceled'
-                user.subscription_end_date = datetime.utcnow()
-                db.session.commit()
-                logging.info(f"✅ Subscription canceled for {user.email}")
-
-        elif event['type'] == 'customer.subscription.updated':
-            subscription = event['data']['object']
-            stripe_sub_id = subscription['id']
-            status = subscription['status']
-
-            user = User.query.filter_by(stripe_subscription_id=stripe_sub_id).first()
-            if user:
-                # Map Stripe status to our status
-                if status == 'active':
-                    user.subscription_status = 'active'
-                elif status in ['canceled', 'unpaid', 'past_due']:
-                    user.subscription_status = status
-                db.session.commit()
-                logging.info(f"✅ Subscription updated for {user.email}: {status}")
 
         return jsonify({'status': 'success'}), 200
  
@@ -1297,112 +1207,6 @@ def init_database():
         print("✅ Deal columns ensured (bad credit, income, fees)")
     except Exception as e:
         print("⚠️ Deal column migration skipped:", e)
-
-    # --- Add subscription columns to users2 if missing ---
-    try:
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free'"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'inactive'"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255)"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_start_date TIMESTAMP"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP"
-        ))
-        db.session.commit()
-        print("✅ Subscription columns ensured (stripe, tier, status)")
-    except Exception as e:
-        print("⚠️ Subscription column migration skipped:", e)
-
-    # --- Create subscription tables if missing ---
-    try:
-        # saved_deal table
-        db.session.execute(db.text("""
-            CREATE TABLE IF NOT EXISTS saved_deal (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                deal_id INTEGER NOT NULL,
-                notes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users2(id),
-                FOREIGN KEY (deal_id) REFERENCES deal(id),
-                UNIQUE(user_id, deal_id)
-            )
-        """))
-
-        # deal_alert table
-        db.session.execute(db.text("""
-            CREATE TABLE IF NOT EXISTS deal_alert (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                alert_name VARCHAR(255),
-                search_params TEXT,
-                alert_frequency VARCHAR(50) DEFAULT 'daily',
-                last_sent TIMESTAMP,
-                is_active BOOLEAN DEFAULT TRUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users2(id)
-            )
-        """))
-
-        # uploaded_document table (Premium+)
-        db.session.execute(db.text("""
-            CREATE TABLE IF NOT EXISTS uploaded_document (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                document_type VARCHAR(50),
-                original_filename VARCHAR(255),
-                stored_filename VARCHAR(255),
-                file_path VARCHAR(500),
-                file_size INTEGER,
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users2(id)
-            )
-        """))
-
-        # eligibility_result table (Premium+)
-        db.session.execute(db.text("""
-            CREATE TABLE IF NOT EXISTS eligibility_result (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                deal_id INTEGER NOT NULL,
-                approval_score INTEGER,
-                approval_likelihood VARCHAR(50),
-                reasons TEXT,
-                ai_model VARCHAR(50),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users2(id),
-                FOREIGN KEY (deal_id) REFERENCES deal(id)
-            )
-        """))
-
-        # consultation_booking table (Premium+)
-        db.session.execute(db.text("""
-            CREATE TABLE IF NOT EXISTS consultation_booking (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                booking_date TIMESTAMP,
-                calendly_event_id VARCHAR(255),
-                status VARCHAR(50) DEFAULT 'scheduled',
-                notes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users2(id)
-            )
-        """))
-
-        db.session.commit()
-        print("✅ Subscription tables ensured")
-    except Exception as e:
-        print("⚠️ Subscription table creation skipped:", e)
 
     # --- Existing index setup ---
     try:
