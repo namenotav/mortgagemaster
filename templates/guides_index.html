@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Mortgage Guides | MortgageDealsHub{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Expert mortgage guides for bad credit, self-employed, first-time buyers and more. Free advice from UK mortgage specialists.">
+{% endblock %}
+
+{% block content %}
+<style>
+    .guides-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .guides-header {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 3rem;
+    }
+
+    .guides-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .guides-header p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+
+    .guides-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .guide-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .guide-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .guide-card-category {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .guide-card h3 {
+        font-size: 1.35rem;
+        margin: 1rem 0;
+        color: #2d3748;
+        line-height: 1.4;
+    }
+
+    .guide-card p {
+        color: #4a5568;
+        margin: 1rem 0;
+        line-height: 1.6;
+    }
+
+    .guide-card-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: #718096;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .guide-card-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    @media (max-width: 768px) {
+        .guides-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .guides-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="guides-container">
+    <!-- Header -->
+    <div class="guides-header">
+        <h1>📚 Mortgage Guides</h1>
+        <p>Expert advice on bad credit, self-employed, first-time buyers and more</p>
+    </div>
+
+    <!-- Guides Grid -->
+    <div class="guides-grid">
+        {% for post in posts %}
+        <a href="/guides/{{ post.slug }}" class="guide-card">
+            <div class="guide-card-category">{{ post.category or 'Mortgage Guide' }}</div>
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.meta_description }}</p>
+            <div class="guide-card-meta">
+                <span>👁️ {{ post.views or 0 }} views</span>
+                <span>📅 {{ post.created_at[:10] if post.created_at else 'Recently' }}</span>
+            </div>
+        </a>
+        {% endfor %}
+
+        {% if not posts %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p style="font-size: 1.2rem; color: #718096;">No guides available yet. Check back soon!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- CTA -->
+    <div style="background: linear-gradient(135deg, #f6ad55 0%, #f56565 100%); color: white; padding: 3rem; border-radius: 12px; text-align: center; margin: 3rem 0;">
+        <h2 style="margin-bottom: 1rem;">🎯 Ready to Find Your Mortgage?</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.95;">
+            Search 500+ deals including bad credit, self-employed & guarantor options!
+        </p>
+        <a href="/" style="display: inline-block; background: white; color: #f56565; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;">
+            👉 SEARCH MORTGAGE DEALS NOW
+        </a>
+    </div>
+</div>
+
+{% endblock %}

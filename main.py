@@ -580,6 +580,68 @@ def register_routes(app):
         except Exception:
             return redirect(url_for('blog'))
 
+    # ---------- Mortgage Guides (Blog Posts from Database) ----------
+    @app.route('/guides/<slug>')
+    def guide_post(slug):
+        """Display a single blog post by slug"""
+        import sqlite3
+        conn = sqlite3.connect('instance/database.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM blog_post WHERE slug = ? AND published = 1", (slug,))
+        post_data = cursor.fetchone()
+
+        if not post_data:
+            conn.close()
+            abort(404)
+
+        # Increment views
+        cursor.execute("UPDATE blog_post SET views = views + 1 WHERE slug = ?", (slug,))
+        conn.commit()
+
+        # Parse post data
+        post = {
+            'id': post_data[0],
+            'slug': post_data[1],
+            'title': post_data[2],
+            'meta_description': post_data[3],
+            'content': post_data[4],
+            'author': post_data[5] or 'MortgageDealsHub',
+            'category': post_data[6],
+            'keywords': post_data[7],
+            'views': post_data[10] + 1,
+            'created_at': post_data[11]
+        }
+
+        conn.close()
+
+        return render_template('guide_post.html', post=post)
+
+    @app.route('/guides')
+    def guides_index():
+        """List all published blog posts"""
+        import sqlite3
+        conn = sqlite3.connect('instance/database.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id, slug, title, meta_description, category, views, created_at FROM blog_post WHERE published = 1 ORDER BY created_at DESC")
+        posts_data = cursor.fetchall()
+        conn.close()
+
+        posts = []
+        for p in posts_data:
+            posts.append({
+                'id': p[0],
+                'slug': p[1],
+                'title': p[2],
+                'meta_description': p[3],
+                'category': p[4],
+                'views': p[5],
+                'created_at': p[6]
+            })
+
+        return render_template('guides_index.html', posts=posts)
+
     # ---------- Mortgage Help & Tips ----------
     @app.route('/mortgage-tips')
     def mortgage_tips():

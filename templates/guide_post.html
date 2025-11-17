@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} | MortgageDealsHub{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ post.meta_description }}">
+<meta name="keywords" content="{{ post.keywords }}">
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.meta_description }}">
+<meta property="og:type" content="article">
+{% endblock %}
+
+{% block content %}
+<style>
+    .guide-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .guide-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .guide-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .guide-meta {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+        opacity: 0.95;
+    }
+
+    .guide-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .guide-content {
+        background: white;
+        border-radius: 12px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+
+    .guide-content h2 {
+        color: #2d3748;
+        font-size: 2rem;
+        margin: 2.5rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #667eea;
+    }
+
+    .guide-content h3 {
+        color: #4a5568;
+        font-size: 1.5rem;
+        margin: 2rem 0 1rem 0;
+    }
+
+    .guide-content h4 {
+        color: #4a5568;
+        font-size: 1.25rem;
+        margin: 1.5rem 0 0.75rem 0;
+    }
+
+    .guide-content p {
+        margin: 1rem 0;
+        color: #2d3748;
+    }
+
+    .guide-content ul, .guide-content ol {
+        margin: 1rem 0 1rem 2rem;
+        color: #2d3748;
+    }
+
+    .guide-content li {
+        margin: 0.5rem 0;
+    }
+
+    .guide-content strong {
+        color: #1a202c;
+        font-weight: 600;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 1.5rem 0;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .highlight-box {
+        background: #f7fafc;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .breadcrumb {
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    .breadcrumb a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .related-cta {
+        background: linear-gradient(135deg, #f6ad55 0%, #f56565 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 3rem 0;
+        text-align: center;
+    }
+
+    .related-cta h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.75rem;
+    }
+
+    .related-cta p {
+        margin: 0 0 1.5rem 0;
+        opacity: 0.95;
+    }
+
+    @media (max-width: 768px) {
+        .guide-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .guide-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .guide-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .guide-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<div class="guide-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/">Home</a> / <a href="/guides">Guides</a> / {{ post.category or 'Mortgages' }}
+    </div>
+
+    <!-- Header -->
+    <div class="guide-header">
+        <h1>{{ post.title }}</h1>
+        <div class="guide-meta">
+            <span>📅 Published {{ post.created_at[:10] if post.created_at else 'Recently' }}</span>
+            <span>👁️ {{ post.views }} views</span>
+            <span>📂 {{ post.category or 'Mortgage Guides' }}</span>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="guide-content">
+        {{ post.content|safe }}
+
+        <!-- CTA at bottom -->
+        <div class="related-cta">
+            <h3>🎯 Ready to Find Your Mortgage?</h3>
+            <p>Search 500+ deals including bad credit, self-employed & guarantor options!</p>
+            <a href="/" class="cta-button">👉 SEARCH MORTGAGE DEALS NOW</a>
+        </div>
+    </div>
+
+    <!-- Back to guides -->
+    <div style="margin: 2rem 0; text-align: center;">
+        <a href="/guides" style="color: #667eea; text-decoration: none; font-weight: 500;">
+            ← Back to All Guides
+        </a>
+    </div>
+</div>
+
+{% endblock %}
