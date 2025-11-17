@@ -52,10 +52,59 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.LargeBinary, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Legacy subscription field (keep for backwards compatibility)
     is_pro_member = db.Column(db.Boolean, default=False)
 
+    # New subscription fields (added by migration)
+    stripe_customer_id = db.Column(db.String(255))
+    subscription_tier = db.Column(db.String(50), default='free')  # free, premium, premium_plus
+    subscription_status = db.Column(db.String(50), default='inactive')  # active, inactive, canceled, expired
+    stripe_subscription_id = db.Column(db.String(255))
+    subscription_start_date = db.Column(db.DateTime)
+    subscription_end_date = db.Column(db.DateTime)
+
     def is_pro(self):
-        return bool(self.is_pro_member)
+        """Legacy method - keep for backwards compatibility"""
+        return bool(self.is_pro_member) or self.is_premium() or self.is_premium_plus()
+
+    def is_premium(self):
+        """Check if user has Premium (£19.99) or higher subscription"""
+        try:
+            return (
+                self.subscription_tier in ['premium', 'premium_plus'] and
+                self.subscription_status == 'active'
+            )
+        except:
+            return False
+
+    def is_premium_plus(self):
+        """Check if user has Premium+ (£49.99) subscription"""
+        try:
+            return (
+                self.subscription_tier == 'premium_plus' and
+                self.subscription_status == 'active'
+            )
+        except:
+            return False
+
+    def is_free_tier(self):
+        """Check if user is on free tier"""
+        try:
+            return not (self.is_premium() or self.is_premium_plus())
+        except:
+            return True  # Default to free if any error
+
+    def get_subscription_display_name(self):
+        """Get user-friendly subscription tier name"""
+        try:
+            if self.is_premium_plus():
+                return "Premium+ (£49.99/month)"
+            elif self.is_premium():
+                return "Premium (£19.99/month)"
+            else:
+                return "Free"
+        except:
+            return "Free"
 
 
 
@@ -298,7 +347,18 @@ def register_routes(app):
 
             # 🎛️ GATEKEEPER: Check DEMO_MODE and user status
             demo_mode = Settings.is_demo_mode()
-            is_pro_user = current_user.is_authenticated and current_user.is_pro()
+
+            # Check subscription tier (with fallback to legacy is_pro)
+            is_pro_user = False
+            try:
+                if current_user.is_authenticated:
+                    # Premium or Premium+ users see all deals
+                    is_pro_user = current_user.is_premium() or current_user.is_premium_plus() or current_user.is_pro()
+            except Exception as e:
+                # SAFETY: If subscription check fails, fall back to legacy is_pro()
+                logging.error(f"Error checking subscription status: {e}")
+                if current_user.is_authenticated:
+                    is_pro_user = current_user.is_pro()
 
             # Determine if we should limit results
             should_limit = not demo_mode and not is_pro_user
@@ -306,10 +366,10 @@ def register_routes(app):
             # Store all deals for template reference
             all_deals = deals_with_cost
 
-            # If limiting, only show top 3
+            # If limiting, only show top 10 for free users (updated from 3)
             if should_limit:
-                visible_deals = deals_with_cost[:3]
-                locked_deals = deals_with_cost[3:]
+                visible_deals = deals_with_cost[:10]
+                locked_deals = deals_with_cost[10:]
             else:
                 visible_deals = deals_with_cost
                 locked_deals = []
@@ -496,6 +556,60 @@ def register_routes(app):
             flash('Payment system error. Please try again later.', 'danger')
             return redirect(url_for('upgrade'))
 
+    # NEW: PREMIUM SUBSCRIPTION (£19.99/month)
+    @app.route('/upgrade_premium')
+    @login_required
+    def upgrade_premium():
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_PREMIUM_PRICE_ID', ''),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email,
+                    'subscription_tier': 'premium'  # Track tier in metadata
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (Premium £19.99)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (Premium): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
+
+    # NEW: PREMIUM+ SUBSCRIPTION (£49.99/month)
+    @app.route('/upgrade_premium_plus')
+    @login_required
+    def upgrade_premium_plus():
+        try:
+            checkout = stripe.checkout.Session.create(
+                mode="subscription",
+                line_items=[{
+                    "price": app.config.get('STRIPE_PREMIUM_PLUS_PRICE_ID', ''),
+                    "quantity": 1
+                }],
+                success_url=url_for('payment_success', _external=True),
+                cancel_url=url_for('dashboard', _external=True),
+                customer_email=current_user.email,
+                metadata={
+                    'user_id': current_user.id,
+                    'user_email': current_user.email,
+                    'subscription_tier': 'premium_plus'  # Track tier in metadata
+                }
+            )
+            logging.info(f"Stripe checkout session created for user {current_user.email} (Premium+ £49.99)")
+            return redirect(checkout.url)
+        except Exception as e:
+            logging.error(f"Stripe checkout error (Premium+): {str(e)}")
+            flash('Payment system error. Please try again later.', 'danger')
+            return redirect(url_for('upgrade'))
+
     @app.route('/payment_success')
     @login_required
     def payment_success():
@@ -527,17 +641,58 @@ def register_routes(app):
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
             user_email = session.get('customer_email')
+            metadata = session.get('metadata', {})
+            subscription_tier = metadata.get('subscription_tier', 'premium')  # Default to premium if not specified
 
             if user_email:
                 user = User.query.filter_by(email=user_email).first()
                 if user:
-                    user.is_pro_member = True
-                    db.session.commit()
-                    logging.info(f"✅ PRO access granted to {user_email} via Stripe webhook")
+                    try:
+                        # Get Stripe customer and subscription IDs
+                        customer_id = session.get('customer')
+                        subscription_id = session.get('subscription')
+
+                        # Update new subscription fields
+                        user.stripe_customer_id = customer_id
+                        user.subscription_tier = subscription_tier
+                        user.subscription_status = 'active'
+                        user.stripe_subscription_id = subscription_id
+                        user.subscription_start_date = datetime.utcnow()
+
+                        # Also set legacy field for backwards compatibility
+                        user.is_pro_member = True
+
+                        db.session.commit()
+                        logging.info(f"✅ {subscription_tier.upper()} access granted to {user_email} via Stripe webhook")
+                    except Exception as e:
+                        # SAFETY: If subscription update fails, still grant legacy access
+                        logging.error(f"Error updating subscription fields for {user_email}: {e}")
+                        try:
+                            user.is_pro_member = True
+                            db.session.commit()
+                            logging.info(f"✅ Fallback: PRO access granted to {user_email}")
+                        except Exception as fallback_error:
+                            logging.error(f"Critical error granting access to {user_email}: {fallback_error}")
                 else:
                     logging.warning(f"⚠️ Stripe payment received for unknown user: {user_email}")
             else:
                 logging.warning("⚠️ Stripe webhook received without customer_email")
+
+        # Handle subscription cancellation
+        elif event['type'] == 'customer.subscription.deleted':
+            subscription = event['data']['object']
+            subscription_id = subscription.get('id')
+
+            if subscription_id:
+                user = User.query.filter_by(stripe_subscription_id=subscription_id).first()
+                if user:
+                    try:
+                        user.subscription_status = 'canceled'
+                        user.subscription_end_date = datetime.utcnow()
+                        db.session.commit()
+                        logging.info(f"✅ Subscription canceled for {user.email}")
+                    except Exception as e:
+                        logging.error(f"Error canceling subscription for {user.email}: {e}")
 
         return jsonify({'status': 'success'}), 200
  
