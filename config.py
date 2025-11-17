@@ -71,8 +71,8 @@ class Config:
     STRIPE_MONTHLY_PRICE_ID = os.environ.get('STRIPE_MONTHLY_PRICE_ID') or 'price_1STXbDD2EDcoPFLN6hEU2gS9'
 
     # Pricing (in pence)
-    PRO_ONETIME_PRICE = 4900  # £49.00
-    PRO_MONTHLY_PRICE = 1499  # £14.99
+    PRO_ONETIME_PRICE = 4999  # £49.99
+    PRO_MONTHLY_PRICE = 1999  # £19.99
 
     # ==============================
     # 🌍 Site Info

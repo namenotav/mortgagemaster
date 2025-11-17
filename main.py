@@ -530,7 +530,7 @@ def register_routes(app):
             flash('Payment system error. Please try again later.', 'danger')
             return redirect(url_for('upgrade'))
 
-    # MONTHLY PAYMENT (£14.99/month)
+    # MONTHLY PAYMENT (£19.99/month)
     @app.route('/upgrade_monthly')
     @login_required
     def upgrade_monthly():

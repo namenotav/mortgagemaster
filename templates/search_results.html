@@ -10,7 +10,7 @@
         {% if is_limited %}
         <div class="free-user-notice">
             <p>🆓 <strong>Showing top 3 deals</strong> — Upgrade to PRO to unlock all {{ total_deals_count }} deals + save favorites + get rate alerts</p>
-            <a href="{{ url_for('upgrade') }}" class="btn-upgrade-inline">Unlock All Deals - £49/year</a>
+            <a href="{{ url_for('upgrade') }}" class="btn-upgrade-inline">Unlock All Deals - £49.99/year</a>
         </div>
         {% endif %}
 
@@ -154,7 +154,7 @@
                         <div class="deal-actions">
                             <div class="pro-required">
                                 <p>🔒 <strong>PRO members</strong> can save deals, get rate alerts, and compare side-by-side</p>
-                                <a href="{{ url_for('upgrade') }}" class="btn-primary btn-block">Upgrade to PRO - £49/year</a>
+                                <a href="{{ url_for('upgrade') }}" class="btn-primary btn-block">Upgrade to PRO - £49.99/year</a>
                             </div>
                         </div>
                         {% endif %}
@@ -169,7 +169,7 @@
                 <div class="locked-header">
                     <h2>🔒 {{ locked_deals|length }} More Deals Available</h2>
                     <p>Upgrade to PRO to unlock these deals and more features</p>
-                    <a href="{{ url_for('upgrade') }}" class="btn-primary">Unlock All Deals - £49/year</a>
+                    <a href="{{ url_for('upgrade') }}" class="btn-primary">Unlock All Deals - £49.99/year</a>
                 </div>
 
                 <div class="locked-deals-grid">
@@ -214,7 +214,7 @@
                         <li>✅ Remortgage reminders</li>
                         <li>✅ Priority support from mortgage experts</li>
                     </ul>
-                    <a href="{{ url_for('upgrade') }}" class="btn-primary btn-large">Upgrade to PRO - Only £49/year</a>
+                    <a href="{{ url_for('upgrade') }}" class="btn-primary btn-large">Upgrade to PRO - Only £49.99/year</a>
                     <p class="money-back">30-day money-back guarantee • Cancel anytime</p>
                 </div>
             </div>
