@@ -1298,6 +1298,112 @@ def init_database():
     except Exception as e:
         print("⚠️ Deal column migration skipped:", e)
 
+    # --- Add subscription columns to users2 if missing ---
+    try:
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'inactive'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_start_date TIMESTAMP"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP"
+        ))
+        db.session.commit()
+        print("✅ Subscription columns ensured (stripe, tier, status)")
+    except Exception as e:
+        print("⚠️ Subscription column migration skipped:", e)
+
+    # --- Create subscription tables if missing ---
+    try:
+        # saved_deal table
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS saved_deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2(id),
+                FOREIGN KEY (deal_id) REFERENCES deal(id),
+                UNIQUE(user_id, deal_id)
+            )
+        """))
+
+        # deal_alert table
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS deal_alert (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                alert_name VARCHAR(255),
+                search_params TEXT,
+                alert_frequency VARCHAR(50) DEFAULT 'daily',
+                last_sent TIMESTAMP,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2(id)
+            )
+        """))
+
+        # uploaded_document table (Premium+)
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS uploaded_document (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                document_type VARCHAR(50),
+                original_filename VARCHAR(255),
+                stored_filename VARCHAR(255),
+                file_path VARCHAR(500),
+                file_size INTEGER,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2(id)
+            )
+        """))
+
+        # eligibility_result table (Premium+)
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS eligibility_result (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                approval_score INTEGER,
+                approval_likelihood VARCHAR(50),
+                reasons TEXT,
+                ai_model VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2(id),
+                FOREIGN KEY (deal_id) REFERENCES deal(id)
+            )
+        """))
+
+        # consultation_booking table (Premium+)
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS consultation_booking (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                booking_date TIMESTAMP,
+                calendly_event_id VARCHAR(255),
+                status VARCHAR(50) DEFAULT 'scheduled',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2(id)
+            )
+        """))
+
+        db.session.commit()
+        print("✅ Subscription tables ensured")
+    except Exception as e:
+        print("⚠️ Subscription table creation skipped:", e)
+
     # --- Existing index setup ---
     try:
         db.session.execute(db.text(
