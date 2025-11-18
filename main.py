@@ -1534,6 +1534,102 @@ def init_database():
     except Exception as e:
         print("⚠️ Deal column migration skipped:", e)
 
+    # --- Add subscription columns to users2 if missing ---
+    try:
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'inactive'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_start_date TIMESTAMP"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP"
+        ))
+        db.session.commit()
+        print("✅ Subscription columns ensured (£19.99 & £49.99 tiers ready)")
+    except Exception as e:
+        print("⚠️ Subscription column migration skipped:", e)
+
+    # --- Create subscription tables if missing ---
+    try:
+        # Table: saved_deal
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS saved_deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id),
+                FOREIGN KEY (deal_id) REFERENCES deal (id)
+            )
+        """))
+
+        # Table: deal_alert
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS deal_alert (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                alert_type VARCHAR(50),
+                criteria TEXT,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        # Table: uploaded_document
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS uploaded_document (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                document_type VARCHAR(100),
+                file_path VARCHAR(500),
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        # Table: eligibility_result
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS eligibility_result (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                approval_score FLOAT,
+                ai_analysis TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id),
+                FOREIGN KEY (deal_id) REFERENCES deal (id)
+            )
+        """))
+
+        # Table: consultation_booking
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS consultation_booking (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                booking_date TIMESTAMP,
+                status VARCHAR(50),
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        db.session.commit()
+        print("✅ Subscription tables ensured (Premium & Premium+ features ready)")
+    except Exception as e:
+        print("⚠️ Subscription table creation skipped:", e)
+
     # --- Existing index setup ---
     try:
         db.session.execute(db.text(
