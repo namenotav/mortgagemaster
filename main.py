@@ -1,4 +1,4 @@
-# main.py
+# main.py - MortgageMaster Application
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, flash, send_from_directory, abort
