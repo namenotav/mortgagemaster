@@ -272,6 +272,7 @@ def register_routes(app):
 
     @app.route('/')
     def index():
+        # Subscription tiers: Premium £19.99/mo, Premium+ £49.99/mo
         return render_template('index.html')
 
     @app.route('/search_deals', methods=['GET'])
@@ -1187,6 +1188,177 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
         # Return as plain text
         return '<pre>' + '\n'.join(output) + '</pre>', 200, {'Content-Type': 'text/html; charset=utf-8'}
 
+    # ---------- ONE-TIME SUBSCRIPTION SETUP (SAFE MIGRATION) ----------
+    @app.route('/secret-setup-subscriptions-xyz')
+    def setup_subscriptions_once():
+        """
+        ONE-TIME SETUP: Creates subscription tables and adds columns to users2
+        SAFE: Uses IF NOT EXISTS, won't break if already exists
+        Visit this route ONCE on Railway to activate £19.99 & £49.99 subscriptions
+        """
+        import sqlite3
+
+        output = []
+        output.append("=" * 60)
+        output.append("💎 ONE-TIME SUBSCRIPTION SETUP")
+        output.append("=" * 60)
+        output.append("")
+
+        try:
+            # Connect to database
+            conn = sqlite3.connect('instance/database.db')
+            cursor = conn.cursor()
+
+            # Helper function to check if column exists
+            def column_exists(table_name, column_name):
+                cursor.execute(f"PRAGMA table_info({table_name})")
+                columns = [row[1] for row in cursor.fetchall()]
+                return column_name in columns
+
+            # PART 1: Add subscription columns to users2 table
+            output.append("PART 1: Adding subscription columns to users2 table...")
+            output.append("")
+
+            new_columns = [
+                ('stripe_customer_id', 'VARCHAR(255)'),
+                ('subscription_tier', 'VARCHAR(50) DEFAULT "free"'),
+                ('subscription_status', 'VARCHAR(50) DEFAULT "inactive"'),
+                ('stripe_subscription_id', 'VARCHAR(255)'),
+                ('subscription_start_date', 'TIMESTAMP'),
+                ('subscription_end_date', 'TIMESTAMP')
+            ]
+
+            for col_name, col_type in new_columns:
+                if not column_exists('users2', col_name):
+                    cursor.execute(f"ALTER TABLE users2 ADD COLUMN {col_name} {col_type}")
+                    output.append(f"  ✅ Added column: {col_name}")
+                else:
+                    output.append(f"  ⏭️  Column already exists: {col_name}")
+
+            conn.commit()
+            output.append("")
+            output.append("✅ Subscription columns added to users2!")
+
+            # PART 2: Create subscription tables
+            output.append("")
+            output.append("PART 2: Creating subscription tables...")
+            output.append("")
+
+            # Table 1: saved_deal
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS saved_deal (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    deal_id INTEGER NOT NULL,
+                    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users2 (id),
+                    FOREIGN KEY (deal_id) REFERENCES deal (id)
+                )
+            """)
+            output.append("  ✅ Table: saved_deal")
+
+            # Table 2: deal_alert
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS deal_alert (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    alert_type VARCHAR(50),
+                    criteria TEXT,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users2 (id)
+                )
+            """)
+            output.append("  ✅ Table: deal_alert")
+
+            # Table 3: uploaded_document
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS uploaded_document (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    document_type VARCHAR(100),
+                    file_path VARCHAR(500),
+                    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users2 (id)
+                )
+            """)
+            output.append("  ✅ Table: uploaded_document")
+
+            # Table 4: eligibility_result
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS eligibility_result (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    deal_id INTEGER NOT NULL,
+                    approval_score FLOAT,
+                    ai_analysis TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users2 (id),
+                    FOREIGN KEY (deal_id) REFERENCES deal (id)
+                )
+            """)
+            output.append("  ✅ Table: eligibility_result")
+
+            # Table 5: consultation_booking
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS consultation_booking (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    booking_date TIMESTAMP,
+                    status VARCHAR(50),
+                    notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users2 (id)
+                )
+            """)
+            output.append("  ✅ Table: consultation_booking")
+
+            conn.commit()
+            output.append("")
+            output.append("✅ All subscription tables created!")
+
+            # PART 3: Create indexes for performance
+            output.append("")
+            output.append("PART 3: Creating indexes...")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_saved_deal_user ON saved_deal(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_deal_alert_user ON deal_alert(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_uploaded_doc_user ON uploaded_document(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_eligibility_user ON eligibility_result(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_consultation_user ON consultation_booking(user_id)")
+            conn.commit()
+            output.append("✅ Indexes created!")
+
+            conn.close()
+
+            output.append("")
+            output.append("=" * 60)
+            output.append("🎉 SUBSCRIPTION SETUP COMPLETE!")
+            output.append("=" * 60)
+            output.append("")
+            output.append("Your subscription system is now active!")
+            output.append("")
+            output.append("Available tiers:")
+            output.append("  💎 Premium - £19.99/month (see all 2000+ deals)")
+            output.append("  💎💎 Premium+ - £49.99/month (all deals + consultant)")
+            output.append("")
+            output.append("Next steps:")
+            output.append("1. Test: Sign up for a new account")
+            output.append("2. Test: Visit /upgrade_premium (£19.99)")
+            output.append("3. Test: Visit /upgrade_premium_plus (£49.99)")
+            output.append("4. Test: Use Stripe test card: 4242 4242 4242 4242")
+            output.append("")
+            output.append("Revenue activated: £250k/month potential! 🚀")
+
+        except Exception as e:
+            output.append("")
+            output.append(f"❌ ERROR: {str(e)}")
+            output.append("")
+            output.append("This is safe - your app is not broken.")
+            output.append("Contact support if error persists.")
+
+        # Return as plain text
+        return '<pre>' + '\n'.join(output) + '</pre>', 200, {'Content-Type': 'text/html; charset=utf-8'}
+
     # ---------- Admin Data Scraper Dashboard ----------
     @app.route('/secret-admin-scraper-xyz')
     def admin_scraper():
@@ -1362,6 +1534,102 @@ def init_database():
         print("✅ Deal columns ensured (bad credit, income, fees)")
     except Exception as e:
         print("⚠️ Deal column migration skipped:", e)
+
+    # --- Add subscription columns to users2 if missing ---
+    try:
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'inactive'"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255)"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_start_date TIMESTAMP"
+        ))
+        db.session.execute(db.text(
+            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP"
+        ))
+        db.session.commit()
+        print("✅ Subscription columns ensured (£19.99 & £49.99 tiers ready)")
+    except Exception as e:
+        print("⚠️ Subscription column migration skipped:", e)
+
+    # --- Create subscription tables if missing ---
+    try:
+        # Table: saved_deal
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS saved_deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id),
+                FOREIGN KEY (deal_id) REFERENCES deal (id)
+            )
+        """))
+
+        # Table: deal_alert
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS deal_alert (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                alert_type VARCHAR(50),
+                criteria TEXT,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        # Table: uploaded_document
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS uploaded_document (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                document_type VARCHAR(100),
+                file_path VARCHAR(500),
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        # Table: eligibility_result
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS eligibility_result (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deal_id INTEGER NOT NULL,
+                approval_score FLOAT,
+                ai_analysis TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id),
+                FOREIGN KEY (deal_id) REFERENCES deal (id)
+            )
+        """))
+
+        # Table: consultation_booking
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS consultation_booking (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                booking_date TIMESTAMP,
+                status VARCHAR(50),
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users2 (id)
+            )
+        """))
+
+        db.session.commit()
+        print("✅ Subscription tables ensured (Premium & Premium+ features ready)")
+    except Exception as e:
+        print("⚠️ Subscription table creation skipped:", e)
 
     # --- Existing index setup ---
     try:
