@@ -272,6 +272,7 @@ def register_routes(app):
 
     @app.route('/')
     def index():
+        # Subscription tiers: Premium £19.99/mo, Premium+ £49.99/mo
         return render_template('index.html')
 
     @app.route('/search_deals', methods=['GET'])
