@@ -162,6 +162,25 @@ class Settings(db.Model):
         return Settings.get('DEMO_MODE', 'True') == 'True'
 
 
+class BlogPost(db.Model):
+    """Blog post model for SEO-optimized content"""
+    __tablename__ = "blog_post"
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(200), unique=True, nullable=False, index=True)
+    title = db.Column(db.String(500), nullable=False)
+    meta_description = db.Column(db.String(160))
+    content = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(100), default="MortgageDealsHub Team")
+    published_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_date = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_published = db.Column(db.Boolean, default=True)
+    view_count = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return f'<BlogPost {self.slug}>'
+
+
 # -------------------------------------------------
 # App Factory
 # -------------------------------------------------
@@ -1325,43 +1344,52 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
 def init_database():
     db.create_all()
 
-    # --- Add is_pro_member column if missing ---
+    # --- Add is_pro_member column if missing (SQLite compatible) ---
     try:
-        db.session.execute(db.text(
-            "ALTER TABLE users2 ADD COLUMN IF NOT EXISTS is_pro_member BOOLEAN DEFAULT FALSE"
-        ))
-        db.session.commit()
-        print("✅ Column is_pro_member ensured")
-    except Exception as e:
-        print("⚠️ Column migration skipped or failed:", e)
+        # Check if column exists first
+        result = db.session.execute(db.text("PRAGMA table_info(users2)")).fetchall()
+        columns = [col[1] for col in result]
 
-    # --- Add new Deal columns if missing ---
-    try:
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS accepts_bad_credit BOOLEAN DEFAULT FALSE"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS min_credit_score INTEGER DEFAULT 0"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS accepts_low_income BOOLEAN DEFAULT FALSE"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS min_income FLOAT DEFAULT 0"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS lender_type VARCHAR(50) DEFAULT 'mainstream'"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS product_fee FLOAT DEFAULT 0"
-        ))
-        db.session.execute(db.text(
-            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS cashback FLOAT DEFAULT 0"
-        ))
-        db.session.commit()
-        print("✅ Deal columns ensured (bad credit, income, fees)")
+        if 'is_pro_member' not in columns:
+            db.session.execute(db.text(
+                "ALTER TABLE users2 ADD COLUMN is_pro_member BOOLEAN DEFAULT FALSE"
+            ))
+            db.session.commit()
+            print("✅ Column is_pro_member added")
+        else:
+            print("✅ Column is_pro_member already exists")
     except Exception as e:
-        print("⚠️ Deal column migration skipped:", e)
+        print(f"⚠️ Column migration skipped or failed: {e}")
+
+    # --- Add new Deal columns if missing (SQLite compatible) ---
+    try:
+        # Check which columns exist
+        result = db.session.execute(db.text("PRAGMA table_info(deal)")).fetchall()
+        columns = [col[1] for col in result]
+
+        deal_columns_to_add = {
+            'accepts_bad_credit': "ALTER TABLE deal ADD COLUMN accepts_bad_credit BOOLEAN DEFAULT FALSE",
+            'min_credit_score': "ALTER TABLE deal ADD COLUMN min_credit_score INTEGER DEFAULT 0",
+            'accepts_low_income': "ALTER TABLE deal ADD COLUMN accepts_low_income BOOLEAN DEFAULT FALSE",
+            'min_income': "ALTER TABLE deal ADD COLUMN min_income FLOAT DEFAULT 0",
+            'lender_type': "ALTER TABLE deal ADD COLUMN lender_type VARCHAR(50) DEFAULT 'mainstream'",
+            'product_fee': "ALTER TABLE deal ADD COLUMN product_fee FLOAT DEFAULT 0",
+            'cashback': "ALTER TABLE deal ADD COLUMN cashback FLOAT DEFAULT 0"
+        }
+
+        added_count = 0
+        for col_name, sql in deal_columns_to_add.items():
+            if col_name not in columns:
+                db.session.execute(db.text(sql))
+                added_count += 1
+
+        if added_count > 0:
+            db.session.commit()
+            print(f"✅ Added {added_count} new deal columns (bad credit, income, fees)")
+        else:
+            print("✅ All deal columns already exist")
+    except Exception as e:
+        print(f"⚠️ Deal column migration skipped: {e}")
 
     # --- Existing index setup ---
     try:

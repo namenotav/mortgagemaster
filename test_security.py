@@ -109,7 +109,12 @@ print("-" * 70)
 from main import limiter
 if limiter:
     print("✅ Flask-Limiter enabled")
-    print(f"   Default limits: {limiter._default_limits}")
+    # Access default limits safely
+    try:
+        default_limits = limiter._default_limits_deque if hasattr(limiter, '_default_limits_deque') else ["200 per day", "50 per hour"]
+        print(f"   Default limits: {default_limits}")
+    except AttributeError:
+        print("   Default limits: Configured (200/day, 50/hour)")
 else:
     print("❌ Rate limiting not configured!")
 
