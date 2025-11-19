@@ -1,6 +1,7 @@
 # main.py
 # Version: 2025-11-19-PRODUCTION - £19.99 & £49.99 subscriptions LIVE
-# Railway deployment: ACTIVE
+# Railway CI/CD: AUTO-DEPLOY ACTIVE
+# Build timestamp: 2025-11-19 17:42 UTC
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, flash, send_from_directory, abort
