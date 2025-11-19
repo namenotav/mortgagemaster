@@ -10,6 +10,9 @@ from flask_login import (
 )
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, BooleanField, IntegerField, FloatField
+from wtforms.validators import DataRequired, Email, Optional
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
@@ -38,6 +41,60 @@ limiter = Limiter(
 
 # Ensure env vars are loaded locally (Railway uses Variables UI)
 load_dotenv()
+
+# -------------------------------------------------
+# Forms
+# -------------------------------------------------
+class LeadForm(FlaskForm):
+    """Lead capture form for mortgage quote requests"""
+    # Property details
+    property_value = FloatField('Property Value', validators=[Optional()])
+    deposit = FloatField('Deposit', validators=[Optional()])
+    purpose = SelectField('Purpose', choices=[
+        ('purchase', 'Purchase'),
+        ('remortgage', 'Remortgage'),
+        ('buy_to_let', 'Buy to Let')
+    ])
+
+    # Financial details
+    annual_income = FloatField('Annual Income', validators=[Optional()])
+    employment_type = SelectField('Employment Type', choices=[
+        ('employed', 'Employed Full-Time'),
+        ('self_employed', 'Self-Employed'),
+        ('part_time', 'Part-Time'),
+        ('zero_hours', 'Zero-Hours Contract'),
+        ('retired', 'Retired'),
+        ('benefits', 'Benefits'),
+        ('other', 'Other')
+    ])
+    credit_score = SelectField('Credit Score Range', choices=[
+        ('', 'Unknown'),
+        ('300-400', '300-400 (Very Poor)'),
+        ('400-500', '400-500 (Poor)'),
+        ('500-600', '500-600 (Fair)'),
+        ('600-700', '600-700 (Good)'),
+        ('700+', '700+ (Excellent)')
+    ])
+
+    # Credit history
+    has_ccj = BooleanField('CCJs')
+    has_defaults = BooleanField('Defaults')
+    has_arrears = BooleanField('Arrears')
+
+    # Timeline
+    timeline = SelectField('Timeline', choices=[
+        ('asap', 'ASAP'),
+        ('1-3months', '1-3 months'),
+        ('3-6months', '3-6 months'),
+        ('6-12months', '6-12 months'),
+        ('12months+', '12+ months')
+    ])
+
+    # Contact details
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone', validators=[DataRequired()])
+    consent_marketing = BooleanField('Marketing Consent')
 
 # -------------------------------------------------
 # Models
@@ -131,6 +188,67 @@ class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, index=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Lead(db.Model):
+    """Mortgage lead captures for lead generation revenue"""
+    id = db.Column(db.Integer, primary_key=True)
+    # Property details
+    property_value = db.Column(db.Float)
+    deposit = db.Column(db.Float)
+    purpose = db.Column(db.String(50))  # purchase, remortgage, buy_to_let
+
+    # Financial details
+    annual_income = db.Column(db.Float)
+    employment_type = db.Column(db.String(50))  # employed, self_employed, retired, etc
+    credit_score_range = db.Column(db.String(20))  # 300-400, 400-500, etc
+
+    # Credit history flags
+    has_ccj = db.Column(db.Boolean, default=False)
+    has_defaults = db.Column(db.Boolean, default=False)
+    has_arrears = db.Column(db.Boolean, default=False)
+
+    # Timeline
+    timeline = db.Column(db.String(20))  # asap, 1-3months, 3-6months, 6-12months
+
+    # Contact details
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False, index=True)
+    phone = db.Column(db.String(20), nullable=False)
+
+    # Consent and tracking
+    consent_marketing = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(50))
+    source = db.Column(db.String(100))  # Where they came from
+
+    # Lead quality score (calculated)
+    quality_score = db.Column(db.Integer, default=0)  # 0-100
+    estimated_value = db.Column(db.Float, default=0)  # £25-£50 per lead
+
+
+class AffiliateClick(db.Model):
+    """Track affiliate link clicks for commission attribution"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users2.id'), nullable=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey('deal.id'), nullable=False)
+    lender = db.Column(db.String(120), index=True)
+    clicked_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(500))
+    conversion_tracked = db.Column(db.Boolean, default=False)
+
+
+class SavedDeal(db.Model):
+    """PRO users can save and track deals"""
+    __tablename__ = 'saved_deal'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users2.id'), nullable=False)
+    deal_id = db.Column(db.Integer, db.ForeignKey('deal.id'), nullable=False)
+    saved_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Create unique constraint to prevent duplicate saves
+    __table_args__ = (db.UniqueConstraint('user_id', 'deal_id', name='_user_deal_uc'),)
 
 
 class Settings(db.Model):
@@ -833,6 +951,143 @@ def register_routes(app):
         logging.info(f"New subscriber: {validated_email}")
         flash('Thanks! You will receive rate alerts by email.', 'success')
         return redirect(url_for('index'))
+
+    # ---------- Lead Capture (Revenue Generation!) ----------
+    @app.route('/get-quote')
+    def get_quote():
+        """Lead capture form for mortgage quotes"""
+        form = LeadForm()
+        return render_template('lead_capture.html', form=form)
+
+    @app.route('/submit-lead', methods=['POST'])
+    @limiter.limit("5 per hour")
+    def submit_lead():
+        """Process lead submission"""
+        form = LeadForm()
+
+        if form.validate_on_submit():
+            # Calculate lead quality score (0-100)
+            quality_score = 50  # Base score
+
+            # Higher value properties = higher quality
+            if form.property_value.data and form.property_value.data > 200000:
+                quality_score += 10
+            if form.deposit.data and form.deposit.data > 20000:
+                quality_score += 10
+
+            # Employed full-time = higher quality
+            if form.employment_type.data == 'employed':
+                quality_score += 15
+
+            # Better credit = higher quality
+            if form.credit_score.data in ['600-700', '700+']:
+                quality_score += 15
+
+            # Sooner timeline = higher quality
+            if form.timeline.data in ['asap', '1-3months']:
+                quality_score += 10
+
+            # Estimate lead value (£25-£50 based on quality)
+            estimated_value = 25 + (quality_score / 4)  # £25 at 0 score, £50 at 100 score
+
+            # Create lead
+            lead = Lead(
+                property_value=form.property_value.data,
+                deposit=form.deposit.data,
+                purpose=form.purpose.data,
+                annual_income=form.annual_income.data,
+                employment_type=form.employment_type.data,
+                credit_score_range=form.credit_score.data,
+                has_ccj=form.has_ccj.data,
+                has_defaults=form.has_defaults.data,
+                has_arrears=form.has_arrears.data,
+                timeline=form.timeline.data,
+                name=form.name.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                consent_marketing=form.consent_marketing.data,
+                ip_address=request.remote_addr,
+                source=request.referrer or 'direct',
+                quality_score=quality_score,
+                estimated_value=estimated_value
+            )
+
+            db.session.add(lead)
+            db.session.commit()
+
+            logging.info(f"💰 NEW LEAD: {lead.email} - Quality: {quality_score}/100 - Value: £{estimated_value:.2f}")
+
+            flash('✅ Quote request submitted! We\'ll contact you within 24 hours.', 'success')
+            return redirect(url_for('search_deals',
+                property_value=form.property_value.data or 250000,
+                deposit=form.deposit.data or 25000
+            ))
+
+        # If form validation fails
+        flash('⚠️ Please check your details and try again.', 'warning')
+        return render_template('lead_capture.html', form=form)
+
+    # ---------- Affiliate Click Tracking (Commission Revenue!) ----------
+    @app.route('/track-click/<int:deal_id>', methods=['POST'])
+    def track_affiliate_click(deal_id):
+        """Track affiliate link click for commission attribution"""
+        deal = Deal.query.get_or_404(deal_id)
+
+        # Create click tracking record
+        click = AffiliateClick(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            deal_id=deal_id,
+            lender=deal.lender,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent', '')
+        )
+
+        db.session.add(click)
+        db.session.commit()
+
+        logging.info(f"🔗 Affiliate click tracked: {deal.lender} (Deal #{deal_id})")
+
+        # Return success (frontend will redirect user to lender)
+        return jsonify({'success': True, 'click_id': click.id})
+
+    @app.route('/save-deal', methods=['POST'])
+    @login_required
+    def save_deal():
+        """Save a deal for tracking (PRO users only)"""
+        # Check if user is PRO
+        if not current_user.is_pro():
+            return jsonify({'success': False, 'error': 'PRO subscription required'}), 403
+
+        data = request.get_json()
+        deal_id = data.get('deal_id')
+
+        if not deal_id:
+            return jsonify({'success': False, 'error': 'Missing deal_id'}), 400
+
+        # Check if deal exists
+        deal = Deal.query.get_or_404(deal_id)
+
+        # Check if already saved
+        existing = SavedDeal.query.filter_by(
+            user_id=current_user.id,
+            deal_id=deal_id
+        ).first()
+
+        if existing:
+            return jsonify({'success': False, 'error': 'Already saved'}), 400
+
+        # Save the deal
+        saved_deal = SavedDeal(
+            user_id=current_user.id,
+            deal_id=deal_id
+        )
+
+        db.session.add(saved_deal)
+        db.session.commit()
+
+        logging.info(f"💾 Deal saved by user {current_user.id}: {deal.lender}")
+
+        return jsonify({'success': True, 'saved_id': saved_deal.id})
 
     # ---------- Admin Control Panel (GATEKEEPER) ----------
     @app.route('/secret-admin-control-xyz')

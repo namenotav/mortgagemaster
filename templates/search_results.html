@@ -145,19 +145,27 @@
                         </div>
 
                         <!-- ACTION BUTTON -->
-                        {% if current_user.is_authenticated and current_user.is_pro() %}
                         <div class="deal-actions">
-                            <button class="btn-primary btn-block">💾 Save & Track This Deal</button>
-                            <button class="btn-secondary btn-block">📊 Compare with Others</button>
-                        </div>
-                        {% else %}
-                        <div class="deal-actions">
-                            <div class="pro-required">
-                                <p>🔒 <strong>PRO members</strong> can save deals, get rate alerts, and compare side-by-side</p>
-                                <a href="{{ url_for('upgrade') }}" class="btn-primary btn-block">Upgrade to PRO - £49/year</a>
+                            <!-- APPLY NOW BUTTON (with affiliate tracking) -->
+                            <a href="{{ deal.apply_url or '#' }}"
+                               class="btn-primary btn-block apply-now-btn"
+                               data-deal-id="{{ deal.id }}"
+                               data-lender="{{ deal.lender }}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                🚀 Apply Now at {{ deal.lender }}
+                            </a>
+                            <p class="apply-note">You'll be taken to {{ deal.lender }}'s official website</p>
+
+                            {% if current_user.is_authenticated and current_user.is_pro() %}
+                            <button class="btn-secondary btn-block save-deal-btn" data-deal-id="{{ deal.id }}">💾 Save & Track This Deal</button>
+                            {% else %}
+                            <div class="pro-features-mini">
+                                <p>🔒 <strong>PRO members</strong> can save deals & get rate alerts</p>
+                                <a href="{{ url_for('upgrade') }}" class="btn-outline btn-small">Upgrade to PRO - £49/year</a>
                             </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -269,4 +277,124 @@
         </div>
     </div>
 </section>
+
+<script>
+// 🎯 AFFILIATE CLICK TRACKING
+document.addEventListener('DOMContentLoaded', function() {
+    const applyButtons = document.querySelectorAll('.apply-now-btn');
+
+    applyButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const dealId = this.getAttribute('data-deal-id');
+            const lender = this.getAttribute('data-lender');
+
+            // Track the click asynchronously (don't wait for response)
+            fetch(`/track-click/${dealId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    lender: lender,
+                    timestamp: new Date().toISOString()
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      console.log(`✅ Tracked click for ${lender} (Click ID: ${data.click_id})`);
+                  }
+              })
+              .catch(error => {
+                  console.warn('⚠️ Failed to track click:', error);
+                  // Don't block navigation even if tracking fails
+              });
+
+            // Let the link navigate normally (opens in new tab)
+        });
+    });
+
+    // 💾 SAVE DEAL FUNCTIONALITY (PRO members only)
+    const saveButtons = document.querySelectorAll('.save-deal-btn');
+
+    saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const dealId = this.getAttribute('data-deal-id');
+            const btn = this;
+
+            fetch('/save-deal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ deal_id: dealId })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      btn.textContent = '✅ Saved!';
+                      btn.disabled = true;
+                      btn.classList.add('btn-success');
+                  } else {
+                      alert('Failed to save deal. Please try again.');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('An error occurred. Please try again.');
+              });
+        });
+    });
+});
+</script>
+
+<style>
+.apply-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.pro-features-mini {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.pro-features-mini p {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.btn-outline {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #2563eb;
+    border: 2px solid #2563eb;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-success {
+    background: #059669 !important;
+    cursor: not-allowed;
+}
+
+.save-deal-btn:disabled {
+    opacity: 0.7;
+}
+</style>
 {% endblock %}
