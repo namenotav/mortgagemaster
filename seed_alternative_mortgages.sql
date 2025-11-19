@@ -11,7 +11,7 @@
 -- ========== BANK STATEMENT MORTGAGES (7 deals) ==========
 -- Accept bank statements instead of payslips - PERFECT for cash workers!
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('Aldermore Bank Statement', 6.50, 2, 'fixed', 75, 25000, 500000, 1299, 0, 550, 0, 'bank_statement', TRUE, TRUE),
 ('Bluestone Bank Statement', 6.80, 2, 'fixed', 80, 25000, 500000, 1499, 0, 450, 0, 'bank_statement', TRUE, TRUE),
@@ -24,7 +24,7 @@ VALUES
 -- ========== ASSET-BASED LENDERS (5 deals) ==========
 -- Lend based on assets/savings, NOT income - for cash-rich people!
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('Investec Private Banking', 5.50, 5, 'fixed', 60, 500000, 5000000, 1999, 0, 650, 0, 'asset_based', FALSE, TRUE),
 ('Hampshire Trust Bank Asset', 6.80, 2, 'fixed', 70, 100000, 2000000, 1599, 0, 580, 0, 'asset_based', TRUE, TRUE),
@@ -35,7 +35,7 @@ VALUES
 -- ========== BRIDGING FINANCE (8 deals) ==========
 -- Short-term 6-24 months, NO INCOME CHECKS! Refinance later
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('MT Finance Bridging', 10.20, 1, 'variable', 70, 50000, 5000000, 1999, 0, 500, 0, 'bridging', TRUE, TRUE),
 ('West One Bridging', 11.40, 1, 'variable', 65, 100000, 10000000, 2499, 0, 520, 0, 'bridging', TRUE, TRUE),
@@ -49,7 +49,7 @@ VALUES
 -- ========== CREDIT UNIONS (7 deals) ==========
 -- Community lending with HUMAN review - flexible criteria!
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('London Mutual Credit Union', 6.00, 5, 'fixed', 85, 25000, 250000, 499, 0, 400, 15000, 'credit_union', TRUE, TRUE),
 ('Manchester Credit Union', 6.20, 3, 'fixed', 85, 25000, 200000, 399, 0, 420, 15000, 'credit_union', TRUE, TRUE),
@@ -62,7 +62,7 @@ VALUES
 -- ========== GUARANTOR MORTGAGES (3 deals) ==========
 -- ANY credit score if you have family guarantor!
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('Bamboo Guarantor Loans', 5.50, 3, 'fixed', 100, 25000, 500000, 999, 0, 300, 10000, 'guarantor', TRUE, TRUE),
 ('Generation Home', 5.30, 5, 'fixed', 100, 50000, 750000, 1299, 0, 350, 12000, 'guarantor', TRUE, TRUE),
@@ -71,7 +71,7 @@ VALUES
 -- ========== SHARED OWNERSHIP (5 deals) ==========
 -- Government schemes - buy 25-75% of property!
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('L&Q Shared Ownership', 4.80, 5, 'fixed', 95, 25000, 500000, 999, 0, 450, 18000, 'shared_ownership', TRUE, FALSE),
 ('Clarion Housing Shared Own', 4.90, 3, 'fixed', 95, 25000, 450000, 899, 0, 460, 18000, 'shared_ownership', TRUE, FALSE),
@@ -82,7 +82,7 @@ VALUES
 -- ========== ALTERNATIVE FINANCE - P2P (3 deals) ==========
 -- Peer-to-peer lending with flexible criteria
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('LendInvest P2P', 6.50, 2, 'fixed', 75, 75000, 2000000, 1599, 0, 520, 0, 'alternative_finance', TRUE, TRUE),
 ('Landbay P2P', 6.30, 5, 'fixed', 75, 50000, 1500000, 1399, 0, 540, 0, 'alternative_finance', TRUE, TRUE),
@@ -91,7 +91,7 @@ VALUES
 -- ========== ISLAMIC FINANCE (2 deals) ==========
 -- Sharia-compliant with different underwriting criteria
 
-INSERT INTO deals (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
+INSERT INTO deal (lender, rate, initial_period, product_type, ltv_max, min_loan, max_loan, product_fee, cashback, min_credit_score, min_income, lender_type, accepts_bad_credit, accepts_low_income)
 VALUES
 ('Al Rayan Bank', 5.80, 5, 'fixed', 80, 50000, 500000, 999, 0, 550, 20000, 'alternative_finance', FALSE, FALSE),
 ('Gatehouse Bank', 5.90, 3, 'fixed', 75, 50000, 1000000, 1299, 0, 560, 22000, 'alternative_finance', FALSE, FALSE);
