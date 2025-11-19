@@ -126,6 +126,13 @@ class Deal(db.Model):
     product_fee = db.Column(db.Float, default=0)
     cashback = db.Column(db.Float, default=0)
 
+    # Source attribution fields (for legal defense via facts doctrine)
+    source = db.Column(db.String(200))  # e.g., "MoneySuperMarket", "Santander Direct"
+    source_url = db.Column(db.String(500))  # Optional link to original deal
+    date_found = db.Column(db.DateTime, default=datetime.utcnow)  # When first discovered
+    last_verified = db.Column(db.DateTime, default=datetime.utcnow)  # Last checked
+    product_type = db.Column(db.String(100))  # e.g., "2 Year Fixed", "5 Year Fixed"
+
 
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1480,6 +1487,199 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             logging.error(f"Error in manual refresh: {e}")
 
         return redirect(url_for('admin_scraper'))
+
+    @app.route('/admin/add-deal-manual', methods=['POST'])
+    @csrf.exempt
+    def admin_add_deal_manual():
+        """
+        Manual Deal Entry - LEGAL APPROACH
+
+        User personally browses comparison sites from different locations,
+        then manually enters factual deal information with attribution.
+
+        Legal defense:
+        1. Facts doctrine - rates/fees are facts, not copyrightable
+        2. Attribution - we cite sources
+        3. Personal browsing - user browses personally, not automated
+        """
+        try:
+            # Get user's IP for tracking different locations
+            if request.headers.get('X-Forwarded-For'):
+                user_ip = request.headers.get('X-Forwarded-For').split(',')[0]
+            else:
+                user_ip = request.remote_addr or 'Unknown'
+
+            # Extract form data
+            lender = request.form.get('lender', '').strip()
+            rate = request.form.get('rate')
+            product_type = request.form.get('product_type', '').strip()
+            ltv_max = request.form.get('ltv_max')
+            min_loan = request.form.get('min_loan')
+            max_loan = request.form.get('max_loan')
+            product_fee = request.form.get('product_fee')
+            cashback = request.form.get('cashback', 0)
+
+            # Advanced filtering
+            lender_type = request.form.get('lender_type', 'mainstream')
+            accepts_bad_credit = request.form.get('accepts_bad_credit') == 'on'
+            min_credit_score = request.form.get('min_credit_score', 0)
+            accepts_low_income = request.form.get('accepts_low_income') == 'on'
+            min_income = request.form.get('min_income', 0)
+
+            # Attribution fields (CRITICAL for legal defense!)
+            source = request.form.get('source', 'Unknown')
+            source_url = request.form.get('source_url', '').strip()
+
+            # Validate required fields
+            if not lender or not rate or not ltv_max:
+                flash('❌ Error: Lender, Rate, and Max LTV are required!', 'danger')
+                return redirect(url_for('admin_scraper'))
+
+            # Create new deal with attribution
+            new_deal = Deal(
+                lender=lender,
+                rate=float(rate),
+                product_type=product_type,
+                ltv_max=float(ltv_max),
+                min_loan=float(min_loan) if min_loan else 25000,
+                max_loan=float(max_loan) if max_loan else 500000,
+                product_fee=float(product_fee) if product_fee else 999,
+                cashback=float(cashback) if cashback else 0,
+                lender_type=lender_type,
+                accepts_bad_credit=accepts_bad_credit,
+                min_credit_score=int(min_credit_score) if min_credit_score else 0,
+                accepts_low_income=accepts_low_income,
+                min_income=float(min_income) if min_income else 0,
+                # Attribution
+                source=source,
+                source_url=source_url if source_url else None,
+                date_found=datetime.utcnow(),
+                last_verified=datetime.utcnow()
+            )
+
+            db.session.add(new_deal)
+            db.session.commit()
+
+            # Update stats
+            now = datetime.utcnow()
+            Settings.set('LAST_SCRAPE_TIME', now.strftime('%Y-%m-%d %H:%M:%S'))
+            Settings.set('LAST_UPDATE_IP', user_ip)
+
+            # Update history
+            import json
+            update_history_json = Settings.get('UPDATE_HISTORY', '[]')
+            try:
+                update_history = json.loads(update_history_json)
+            except:
+                update_history = []
+
+            update_entry = {
+                'date': now.strftime('%b %d, %I:%M %p'),
+                'ip': user_ip,
+                'location': 'Manual Entry',
+                'deals_count': f'1 deal added ({lender})'
+            }
+            update_history.append(update_entry)
+            update_history = update_history[-10:]  # Keep last 10
+            Settings.set('UPDATE_HISTORY', json.dumps(update_history))
+
+            flash(f'✅ Deal added successfully: {lender} - {rate}% (from {source})', 'success')
+            logging.info(f"📝 Manual deal added: {lender} {rate}% from {source} (IP: {user_ip})")
+
+        except ValueError as e:
+            flash(f'❌ Invalid number format. Please check your inputs.', 'danger')
+            logging.error(f"ValueError in manual entry: {e}")
+        except Exception as e:
+            flash(f'❌ Error adding deal: {str(e)}', 'danger')
+            logging.error(f"Error in manual deal entry: {e}")
+            db.session.rollback()
+
+        return redirect(url_for('admin_scraper'))
+
+    # ---------- ONE-TIME DEAL MIGRATION (SAFE) ----------
+    @app.route('/secret-migrate-deals-attribution-xyz')
+    def migrate_deals_attribution():
+        """
+        ONE-TIME MIGRATION: Adds source attribution fields to Deal table
+        SAFE: Uses ALTER TABLE ADD COLUMN IF NOT EXISTS
+        Visit this route ONCE on Railway to add new fields
+        """
+        import sqlite3
+
+        output = []
+        output.append("=" * 80)
+        output.append("🔄 DEAL TABLE MIGRATION - Adding Source Attribution Fields")
+        output.append("=" * 80)
+        output.append("")
+        output.append("This migration adds the following fields to the Deal table:")
+        output.append("  - source (VARCHAR 200) - Where the deal came from")
+        output.append("  - source_url (VARCHAR 500) - Link to original deal")
+        output.append("  - date_found (TIMESTAMP) - When deal was first discovered")
+        output.append("  - last_verified (TIMESTAMP) - When deal was last checked")
+        output.append("  - product_type (VARCHAR 100) - e.g., '2 Year Fixed'")
+        output.append("")
+        output.append("These fields provide LEGAL DEFENSE via facts doctrine + attribution!")
+        output.append("")
+
+        try:
+            # Connect to database
+            conn = sqlite3.connect('instance/database.db')
+            cursor = conn.cursor()
+
+            # Check if columns already exist
+            cursor.execute("PRAGMA table_info(deal)")
+            existing_columns = [row[1] for row in cursor.fetchall()]
+            output.append(f"Existing columns in Deal table: {len(existing_columns)}")
+            output.append("")
+
+            new_columns = [
+                ('source', 'VARCHAR(200)'),
+                ('source_url', 'VARCHAR(500)'),
+                ('date_found', 'TIMESTAMP'),
+                ('last_verified', 'TIMESTAMP'),
+                ('product_type', 'VARCHAR(100)')
+            ]
+
+            added_count = 0
+            skipped_count = 0
+
+            for col_name, col_type in new_columns:
+                if col_name not in existing_columns:
+                    try:
+                        cursor.execute(f"ALTER TABLE deal ADD COLUMN {col_name} {col_type}")
+                        output.append(f"✅ Added column: {col_name} ({col_type})")
+                        added_count += 1
+                    except Exception as e:
+                        output.append(f"⚠️ Error adding {col_name}: {e}")
+                else:
+                    output.append(f"⏭️ Skipped {col_name} (already exists)")
+                    skipped_count += 1
+
+            conn.commit()
+            conn.close()
+
+            output.append("")
+            output.append("=" * 80)
+            output.append(f"✅ MIGRATION COMPLETE!")
+            output.append(f"   - {added_count} columns added")
+            output.append(f"   - {skipped_count} columns already existed")
+            output.append("")
+            output.append("🎯 Next Steps:")
+            output.append("   1. Visit /secret-admin-scraper-xyz to start adding deals manually")
+            output.append("   2. Browse MSM/MSE/Moneyfacts personally")
+            output.append("   3. Enter deals with attribution (100% legal!)")
+            output.append("   4. Update 3x per week from different locations")
+            output.append("=" * 80)
+
+        except Exception as e:
+            output.append("")
+            output.append(f"❌ MIGRATION FAILED: {e}")
+            import traceback
+            output.append("")
+            output.append("Full error:")
+            output.append(traceback.format_exc())
+
+        return "<pre>" + "\n".join(output) + "</pre>"
 
     # ---------- Error pages ----------
     @app.errorhandler(404)

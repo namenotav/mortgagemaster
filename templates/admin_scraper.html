@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Scraper Dashboard - Admin</title>
+    <title>Manual Deal Entry - Admin</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .admin-panel {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -94,7 +94,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            max-width: 400px;
         }
 
         .refresh-btn:hover {
@@ -177,41 +176,6 @@
             border-left: 4px solid #dc3545;
         }
 
-        .sources-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .source-item {
-            padding: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .source-item:last-child {
-            border-bottom: none;
-        }
-
-        .source-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .source-status {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .status-active {
-            color: #28a745;
-        }
-
-        .status-planned {
-            color: #ffc107;
-        }
-
         .timestamp-footer {
             background: white;
             border-radius: 12px;
@@ -232,13 +196,44 @@
             color: #666;
             font-size: 0.9rem;
         }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .required {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <div class="admin-panel">
         <div class="header">
-            <h1>🔄 Data Scraper Dashboard</h1>
-            <p class="subtitle">Monitor and manage live mortgage data extraction</p>
+            <h1>📝 Manual Deal Entry Dashboard</h1>
+            <p class="subtitle">100% Legal - Personal browsing + Facts reporting with attribution</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -274,11 +269,12 @@
             </div>
         </div>
 
-        <!-- Actions -->
+        <!-- Manual Entry Form -->
         <div class="actions-card">
-            <h2>🚀 ONE-CLICK DEAL UPDATER</h2>
+            <h2>📝 Add New Deal Manually</h2>
             <p style="margin-bottom: 1.5rem; color: #666; font-size: 1.1rem;">
-                Click the button below to scrape <strong>2000+ mortgage deals</strong> from 70+ sources including alternative income lenders! Takes 3-7 minutes.
+                Browse comparison sites personally, then enter deals manually with attribution.
+                <strong>This is completely legal</strong> - facts reporting with source citation.
             </p>
 
             <!-- Current Location Info -->
@@ -289,40 +285,148 @@
                         <strong>Your IP:</strong> <span style="color: #667eea;">{{ current_ip }}</span>
                     </div>
                     <div>
-                        <strong>Location:</strong> <span style="color: #667eea;">{{ location_info }}</span>
+                        <strong>Last Update IP:</strong> <span style="color: #667eea;">{{ last_ip }}</span>
                     </div>
                 </div>
                 <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
-                    {% if ip_safety == 'safe' %}
-                        <strong style="color: #28a745;">✅ SAFE:</strong> Different IP from last update. Safe to scrape!
-                    {% elif ip_safety == 'warning' %}
-                        <strong style="color: #ffc107;">⚠️ WARNING:</strong> Same IP as last update. Consider using different location.
+                    {% if current_ip != last_ip %}
+                        <strong style="color: #28a745;">✅ GOOD:</strong> Different IP from last update. Looks like different person!
                     {% else %}
-                        <strong style="color: #dc3545;">❌ WAIT:</strong> Too many updates from same IP. Use different location!
+                        <strong style="color: #ffc107;">⚠️ SAME IP:</strong> Consider updating from coffee shop/library for better privacy.
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Big Update Button -->
-            <form method="POST" action="{{ url_for('admin_refresh_deals') }}" id="updateForm">
-                <button type="submit" class="refresh-btn" id="updateBtn" {% if ip_safety == 'blocked' %}disabled{% endif %}>
-                    🔄 UPDATE ALL DEALS NOW (2000+ Deals from 70+ Sources)
+            <!-- Manual Entry Form -->
+            <form method="POST" action="{{ url_for('admin_add_deal_manual') }}" style="background: #f9f9f9; padding: 2rem; border-radius: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                    <!-- Row 1 -->
+                    <div>
+                        <label>Lender <span class="required">*</span></label>
+                        <input type="text" name="lender" required placeholder="e.g., HSBC, Pepper Money">
+                    </div>
+
+                    <div>
+                        <label>Rate (%) <span class="required">*</span></label>
+                        <input type="number" name="rate" step="0.01" required placeholder="e.g., 4.59">
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div>
+                        <label>Product Type</label>
+                        <select name="product_type">
+                            <option value="">Select type...</option>
+                            <option value="2 Year Fixed">2 Year Fixed</option>
+                            <option value="3 Year Fixed">3 Year Fixed</option>
+                            <option value="5 Year Fixed">5 Year Fixed</option>
+                            <option value="10 Year Fixed">10 Year Fixed</option>
+                            <option value="2 Year Tracker">2 Year Tracker</option>
+                            <option value="Lifetime Tracker">Lifetime Tracker</option>
+                            <option value="Variable">Variable</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Max LTV (%) <span class="required">*</span></label>
+                        <input type="number" name="ltv_max" step="1" required placeholder="e.g., 75, 85, 95">
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div>
+                        <label>Min Loan (£)</label>
+                        <input type="number" name="min_loan" step="1000" placeholder="e.g., 25000">
+                    </div>
+
+                    <div>
+                        <label>Max Loan (£)</label>
+                        <input type="number" name="max_loan" step="1000" placeholder="e.g., 500000">
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div>
+                        <label>Product Fee (£)</label>
+                        <input type="number" name="product_fee" step="1" placeholder="e.g., 999">
+                    </div>
+
+                    <div>
+                        <label>Cashback (£)</label>
+                        <input type="number" name="cashback" step="1" placeholder="e.g., 0">
+                    </div>
+
+                    <!-- Row 5: Source Attribution (CRITICAL for legal defense) -->
+                    <div>
+                        <label>
+                            Source <span class="required">*</span>
+                            <span style="font-size: 0.85rem; color: #666; font-weight: normal;">(Legal defense!)</span>
+                        </label>
+                        <select name="source" required>
+                            <option value="">Select source...</option>
+                            <option value="MoneySuperMarket">MoneySuperMarket</option>
+                            <option value="MoneySavingExpert">MoneySavingExpert</option>
+                            <option value="Moneyfacts">Moneyfacts</option>
+                            <option value="Lender Direct Website">Lender Direct Website</option>
+                            <option value="Bank Website">Bank Website</option>
+                            <option value="Building Society Website">Building Society Website</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>
+                            Source URL
+                            <span style="font-size: 0.85rem; color: #666; font-weight: normal;">(Optional but recommended)</span>
+                        </label>
+                        <input type="url" name="source_url" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Advanced Options (Collapsible) -->
+                <details style="margin-top: 1.5rem;">
+                    <summary style="cursor: pointer; font-weight: bold; color: #667eea; padding: 0.5rem; background: #e8eaf6; border-radius: 8px;">
+                        ➕ Advanced Options (Bad Credit, Income Requirements, etc.)
+                    </summary>
+                    <div style="margin-top: 1rem; padding: 1.5rem; background: white; border-radius: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div>
+                            <label>Lender Type</label>
+                            <select name="lender_type">
+                                <option value="mainstream">Mainstream</option>
+                                <option value="specialist">Specialist (Bad Credit)</option>
+                                <option value="building_society">Building Society</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Min Credit Score</label>
+                            <input type="number" name="min_credit_score" placeholder="e.g., 400, 620">
+                        </div>
+
+                        <div>
+                            <label>Min Income (£)</label>
+                            <input type="number" name="min_income" placeholder="e.g., 15000, 25000">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.8rem; justify-content: center;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" name="accepts_bad_credit" style="margin-right: 0.5rem; width: 20px; height: 20px;">
+                                <span style="font-weight: bold;">Accepts Bad Credit</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" name="accepts_low_income" style="margin-right: 0.5rem; width: 20px; height: 20px;">
+                                <span style="font-weight: bold;">Accepts Low Income</span>
+                            </label>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Submit Button -->
+                <button type="submit" class="refresh-btn" style="margin-top: 2rem;">
+                    ✅ ADD DEAL (Legal Manual Entry)
                 </button>
             </form>
 
-            <!-- Progress Indicator (hidden by default) -->
-            <div id="progressContainer" style="display: none; margin-top: 2rem; padding: 1.5rem; background: #f5f5f5; border-radius: 12px;">
-                <h3 style="color: #333; margin-bottom: 1rem;">⏳ Update in Progress...</h3>
-                <div style="background: #e0e0e0; height: 30px; border-radius: 15px; overflow: hidden; margin-bottom: 1rem;">
-                    <div id="progressBar" style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: 0%; transition: width 0.3s;"></div>
-                </div>
-                <div id="progressText" style="color: #666; text-align: center;">Initializing...</div>
-                <div id="progressStats" style="margin-top: 1rem; font-size: 0.9rem; color: #666;"></div>
-            </div>
-
             <!-- Last Update Info -->
-            <div class="last-refresh">
-                <strong>Last Refresh:</strong> {{ stats.last_refresh }}<br>
+            <div class="last-refresh" style="margin-top: 1.5rem;">
+                <strong>Last Update:</strong> {{ stats.last_refresh }}<br>
                 <span style="font-size: 0.9rem; color: #666;">from IP: {{ last_ip }}</span>
             </div>
 
@@ -333,187 +437,72 @@
                     {% if update_history %}
                         {% for update in update_history %}
                             <div style="padding: 0.5rem; border-bottom: 1px solid #e0e0e0;">
-                                <strong>{{ update.date }}</strong> - {{ update.deals_count }} deals - IP: {{ update.ip }} ({{ update.location }})
+                                <strong>{{ update.date }}</strong> - {{ update.deals_count }} - IP: {{ update.ip }} ({{ update.location }})
                             </div>
                         {% endfor %}
                     {% else %}
-                        <p style="color: #999;">No update history yet. Click button above to start!</p>
+                        <p style="color: #999;">No update history yet. Add your first deal above!</p>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="info-box" style="margin-top: 1.5rem; background: #fff3cd; border-left-color: #ffc107;">
-                <strong style="color: #856404;">💡 PRO TIP for Maximum Safety:</strong>
-                <ul style="color: #856404; margin-top: 0.5rem;">
-                    <li>Update from different locations (coffee shop, library, home, etc.)</li>
-                    <li>Use different WiFi networks each time</li>
-                    <li>Update 2-3 times per week (not daily)</li>
-                    <li>Each location = different IP = looks like different person!</li>
+            <div class="info-box" style="margin-top: 1.5rem; background: #d4edda; border-left-color: #28a745;">
+                <strong style="color: #155724;">✅ 100% LEGAL APPROACH:</strong>
+                <ul style="color: #155724; margin-top: 0.5rem;">
+                    <li><strong>Personal Browsing:</strong> You personally visit MSM/MSE/Moneyfacts (legal!)</li>
+                    <li><strong>Facts Reporting:</strong> Rates & fees are facts, not copyrightable</li>
+                    <li><strong>Attribution:</strong> We cite sources on every deal (legal defense)</li>
+                    <li><strong>Different Locations:</strong> Update from coffee shop/library/home = different IPs</li>
+                    <li><strong>3x per week:</strong> Monday/Wednesday/Friday or any schedule you prefer</li>
                 </ul>
             </div>
         </div>
 
-        <!-- Data Sources -->
-        <div class="sources-card">
-            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources (70+ Active!)</h2>
-
-            <!-- Legal Warning -->
-            <div class="warning-box" style="margin-bottom: 1.5rem;">
-                <strong>⚠️ LEGAL NOTICE - Manual Research Mode:</strong>
-                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
-                    <li>✅ YOU manually trigger from different locations (coffee shop, library, home)</li>
-                    <li>✅ Data is transformed and cited (facts doctrine + attribution)</li>
-                    <li>✅ Different IPs each time = looks like different people researching</li>
-                    <li>⚖️ Legal defense: Personal research + Facts reporting + Transformative use</li>
-                </ul>
-            </div>
-
-            <!-- Comparison Sites -->
-            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <strong style="color: #1565c0;">📊 Comparison Sites (3)</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ MoneySuperMarket • ✅ MoneySavingExpert • ✅ Moneyfacts
+        <!-- Quick Reference -->
+        <div class="actions-card">
+            <h2>📚 Quick Reference: Where to Find Deals</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <h3 style="color: #1565c0; margin-bottom: 0.5rem;">🔵 MoneySuperMarket</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Best buy mortgage tables</p>
+                    <a href="https://www.moneysupermarket.com/mortgages/best-buy-tables/" target="_blank"
+                       style="display: inline-block; padding: 0.5rem 1rem; background: #2196f3; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;">
+                        Open Site →
+                    </a>
                 </div>
-            </div>
 
-            <!-- Major Banks -->
-            <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <strong style="color: #2e7d32;">🏦 Major Banks (15)</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ HSBC • ✅ Barclays • ✅ Nationwide • ✅ Santander • ✅ Halifax • ✅ Lloyds<br>
-                    ✅ NatWest • ✅ RBS • ✅ TSB • ✅ Metro Bank • ✅ First Direct<br>
-                    ✅ Co-operative Bank • ✅ Virgin Money • ✅ Tesco Bank • ✅ Atom Bank
+                <div style="background: #fff3e0; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <h3 style="color: #e65100; margin-bottom: 0.5rem;">🟠 MoneySavingExpert</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Mortgage best buys guide</p>
+                    <a href="https://www.moneysavingexpert.com/mortgages/best-buys/" target="_blank"
+                       style="display: inline-block; padding: 0.5rem 1rem; background: #ff9800; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;">
+                        Open Site →
+                    </a>
                 </div>
-            </div>
 
-            <!-- Specialist Lenders (YOUR SECRET WEAPON) -->
-            <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <strong style="color: #e65100;">⭐ Specialist Lenders - Bad Credit (12)</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ Pepper Money • ✅ Bluestone • ✅ Kensington • ✅ Together Money<br>
-                    ✅ Vida Homeloans • ✅ Foundation • ✅ Aldermore • ✅ Precise<br>
-                    ✅ Shawbrook Bank • ✅ Paragon Bank • ✅ Kent Reliance • ✅ Mansfield BS
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #ff6f00; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    🔥 <strong>MARKET ADVANTAGE:</strong> These lenders accept bad credit (300-550 score)! Most comparison sites don't list them!
+                <div style="background: #f3e5f5; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <h3 style="color: #6a1b9a; margin-bottom: 0.5rem;">🟣 Moneyfacts</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Mortgage comparison</p>
+                    <a href="https://moneyfacts.co.uk/mortgages/" target="_blank"
+                       style="display: inline-block; padding: 0.5rem 1rem; background: #9c27b0; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;">
+                        Open Site →
+                    </a>
                 </div>
             </div>
 
-            <!-- Building Societies -->
-            <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <strong style="color: #6a1b9a;">🏛️ Building Societies (8)</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ Skipton • ✅ Leeds • ✅ Yorkshire • ✅ Newcastle<br>
-                    ✅ Coventry • ✅ Principality • ✅ Nottingham • ✅ Cumberland
-                </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <strong style="color: #856404;">💡 WORKFLOW TIP:</strong>
+                <p style="color: #856404; margin-top: 0.5rem; line-height: 1.6;">
+                    1. Open one of the sites above in a new tab<br>
+                    2. Browse deals (you're doing this personally - legal!)<br>
+                    3. Copy deal details to this form<br>
+                    4. Select the source you got it from<br>
+                    5. Click "Add Deal" - Done!<br>
+                    <br>
+                    <strong>Repeat 3x per week from different locations</strong> (coffee shop Monday, library Wednesday, home Friday)
+                    = different IPs = looks like different people = maximum privacy!
+                </p>
             </div>
-
-            <!-- ========== NEW: ALTERNATIVE INCOME SOURCES ========== -->
-
-            <!-- Bank Statement Lenders -->
-            <div style="background: #e1f5fe; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #0288d1;">
-                <strong style="color: #01579b;">💰 Bank Statement Lenders (7) - NO PAYSLIPS!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ Aldermore • ✅ Bluestone • ✅ Pepper Money • ✅ Kensington<br>
-                    ✅ Foundation • ✅ Precise • ✅ Vida
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #0288d1; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    💡 Accept BANK STATEMENTS instead of payslips - perfect for cash workers, self-employed!
-                </div>
-            </div>
-
-            <!-- Asset-Based Lenders -->
-            <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #7b1fa2;">
-                <strong style="color: #4a148c;">💎 Asset-Based Lenders (5) - NO INCOME NEEDED!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ Investec • ✅ Hampshire Trust • ✅ Together Money • ✅ Masthaven • ✅ Roma Finance
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #7b1fa2; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    💰 Lend based on ASSETS (savings, deposits) not income - for people with cash but no payslips!
-                </div>
-            </div>
-
-            <!-- Bridging Lenders -->
-            <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #f57c00;">
-                <strong style="color: #e65100;">🌉 Bridging Finance (8) - SHORT-TERM!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ MT Finance • ✅ West One • ✅ Roma • ✅ LendInvest<br>
-                    ✅ United Trust • ✅ Shawbrook • ✅ Together • ✅ Hope Capital
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f57c00; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    ⏱️ 6-24 month loans, NO income checks! Refinance later when income documented.
-                </div>
-            </div>
-
-            <!-- Credit Unions -->
-            <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #388e3c;">
-                <strong style="color: #1b5e20;">🤝 Credit Unions (7) - HUMAN REVIEW!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ London Mutual • ✅ Manchester • ✅ Glasgow • ✅ Leeds<br>
-                    ✅ Birmingham • ✅ Liverpool • ✅ Scotwest
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #388e3c; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    👥 HUMAN underwriting (not just algorithms) - flexible for cash workers, 400+ credit score!
-                </div>
-            </div>
-
-            <!-- Guarantor Lenders -->
-            <div style="background: #fce4ec; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #c2185b;">
-                <strong style="color: #880e4f;">👨‍👩‍👧 Guarantor Mortgages (3) - ANY CREDIT SCORE!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ Bamboo Loans • ✅ Generation Home • ✅ Saffron BS
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #c2185b; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    🔓 Accept 300+ credit score if family member guarantees - perfect for bad credit!
-                </div>
-            </div>
-
-            <!-- Shared Ownership -->
-            <div style="background: #e0f2f1; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #00796b;">
-                <strong style="color: #004d40;">🏘️ Shared Ownership (5) - GOVERNMENT SCHEMES!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ L&Q • ✅ Clarion Housing • ✅ Network Homes • ✅ Peabody • ✅ Southern Housing
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #00796b; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    🏛️ Buy 25-75% of property (government-backed) - lower credit requirements!
-                </div>
-            </div>
-
-            <!-- Alternative Finance -->
-            <div style="background: #fbe9e7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #d84315;">
-                <strong style="color: #bf360c;">🔄 Alternative Finance (5) - P2P & ISLAMIC!</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ LendInvest P2P • ✅ Landbay P2P • ✅ Folk2Folk<br>
-                    ✅ Al Rayan Bank • ✅ Gatehouse Bank
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #d84315; color: white; border-radius: 4px; font-size: 0.85rem;">
-                    🌍 Peer-to-peer lending + Sharia-compliant finance with flexible criteria!
-                </div>
-            </div>
-
-            <!-- Stats Summary -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
-                <h3 style="margin-bottom: 0.5rem; font-size: 1.3rem;">🎯 TOTAL DATA SOURCES</h3>
-                <div style="font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">70+</div>
-                <div style="font-size: 1.2rem; opacity: 0.95; margin-top: 0.5rem;">Expected: 2000+ unique mortgage deals</div>
-                <div style="font-size: 1rem; margin-top: 1rem; opacity: 0.9; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                    <strong>🔥 MARKET DOMINATION:</strong><br>
-                    More than MoneySuperMarket! More than MSE! More than Moneyfacts!<br>
-                    <strong>PLUS alternatives for bad credit & no income docs!</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Info Box -->
-        <div class="info-box">
-            <h3>ℹ️ How Data Scraping Works</h3>
-            <ul>
-                <li><strong>Automatic Updates:</strong> Scraper runs daily at 3 AM to fetch fresh deals</li>
-                <li><strong>Multiple Sources:</strong> Data from bank websites, comparison sites, and APIs</li>
-                <li><strong>Validation:</strong> All scraped data is validated and deduplicated before saving</li>
-                <li><strong>Fallback:</strong> If scraping fails, existing data is preserved</li>
-                <li><strong>Rate Limiting:</strong> Built-in delays to respect website policies</li>
-            </ul>
         </div>
 
         <a href="{{ url_for('index') }}" class="back-link">← Back to Homepage</a>
@@ -547,60 +536,6 @@
         // Update immediately and then every second
         updateClock();
         setInterval(updateClock, 1000);
-
-        // Handle form submission and show progress
-        document.getElementById('updateForm').addEventListener('submit', function(e) {
-            // Show progress container
-            document.getElementById('progressContainer').style.display = 'block';
-            document.getElementById('updateBtn').disabled = true;
-            document.getElementById('updateBtn').textContent = '⏳ Update in progress...';
-
-            // Scroll to progress
-            document.getElementById('progressContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Simulate progress (since we can't get real-time updates easily)
-            let progress = 0;
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const progressStats = document.getElementById('progressStats');
-
-            const steps = [
-                {percent: 5, text: 'Initializing headless browser...', stats: ''},
-                {percent: 10, text: 'Scraping MoneySuperMarket...', stats: ''},
-                {percent: 15, text: 'Extracting MSM deals...', stats: '✅ MoneySuperMarket: 35 deals'},
-                {percent: 20, text: 'Scraping MoneySavingExpert...', stats: '✅ MoneySuperMarket: 35 deals'},
-                {percent: 25, text: 'Extracting MSE deals...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals'},
-                {percent: 30, text: 'Scraping Moneyfacts...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals'},
-                {percent: 35, text: 'Extracting Moneyfacts deals...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals<br>✅ Moneyfacts: 42 deals'},
-                {percent: 40, text: 'Scraping HSBC...', stats: '105 deals so far...'},
-                {percent: 45, text: 'Scraping Barclays & Nationwide...', stats: '156 deals so far...'},
-                {percent: 50, text: 'Scraping Santander & Halifax...', stats: '203 deals so far...'},
-                {percent: 55, text: 'Scraping Lloyds & NatWest...', stats: '267 deals so far...'},
-                {percent: 60, text: 'Scraping Pepper Money (Specialist)...', stats: '334 deals so far...'},
-                {percent: 65, text: 'Scraping Bluestone & Kensington...', stats: '412 deals so far...'},
-                {percent: 70, text: 'Scraping Together Money & Vida...', stats: '489 deals so far...'},
-                {percent: 75, text: 'Scraping Building Societies...', stats: '567 deals so far...'},
-                {percent: 80, text: 'Scraping Skipton & Leeds BS...', stats: '645 deals so far...'},
-                {percent: 85, text: 'Scraping Yorkshire & Coventry BS...', stats: '723 deals so far...'},
-                {percent: 90, text: 'Transforming data & adding context...', stats: '801 deals so far...'},
-                {percent: 95, text: 'Deduplicating & validating...', stats: '879 deals extracted...'},
-                {percent: 98, text: 'Updating database...', stats: 'Processing final deals...'},
-                {percent: 100, text: '✅ Complete! Redirecting...', stats: '🎉 Done!'}
-            ];
-
-            let stepIndex = 0;
-            const interval = setInterval(function() {
-                if (stepIndex < steps.length) {
-                    const step = steps[stepIndex];
-                    progressBar.style.width = step.percent + '%';
-                    progressText.textContent = step.text;
-                    progressStats.innerHTML = step.stats;
-                    stepIndex++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, 5000); // Update every 5 seconds (total ~100 seconds / 1.7 minutes)
-        });
     </script>
 </body>
 </html>

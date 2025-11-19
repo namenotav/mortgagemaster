@@ -144,6 +144,30 @@
                             </div>
                         </div>
 
+                        <!-- SOURCE ATTRIBUTION (Legal Defense) -->
+                        {% if deal.source %}
+                        <div style="margin-top: 1rem; padding: 0.8rem; background: #f8f9fa; border-left: 3px solid #667eea; border-radius: 6px; font-size: 0.85rem;">
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong style="color: #333;">📊 Source:</strong>
+                                {% if deal.source_url %}
+                                    <a href="{{ deal.source_url }}" target="_blank" rel="noopener" style="color: #667eea; text-decoration: none;">
+                                        {{ deal.source }} →
+                                    </a>
+                                {% else %}
+                                    <span style="color: #333;">{{ deal.source }}</span>
+                                {% endif %}
+                            </div>
+                            {% if deal.date_found %}
+                            <div style="color: #666; font-size: 0.8rem;">
+                                Found {{ deal.date_found.strftime('%b %d, %Y') }}
+                                {% if deal.last_verified and deal.last_verified != deal.date_found %}
+                                    • Last verified {{ deal.last_verified.strftime('%b %d, %Y') }}
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
                         <!-- ACTION BUTTON -->
                         {% if current_user.is_authenticated and current_user.is_pro() %}
                         <div class="deal-actions">
