@@ -41,7 +41,9 @@ class Config:
         SQLALCHEMY_DATABASE_URI = raw_url.replace('postgres://', 'postgresql://')
     else:
         # ✅ Local fallback (persistent file-based SQLite in instance folder)
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/database.db'
+        import os.path
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'instance', 'database.db')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
