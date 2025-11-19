@@ -1,72 +1,312 @@
 {% extends "base.html" %}
 
-{% block title %}Upgrade to Pro | MortgageDealsHub{% endblock %}
+{% block title %}Upgrade to Premium | MortgageDealsHub{% endblock %}
 
 {% block content %}
 <section class="pricing-page">
     <div class="container">
-        <h1 class="page-title">Upgrade to MortgageDealsHub Pro</h1>
+        <h1 class="page-title">Upgrade Your Mortgage Search</h1>
         <p class="page-subtitle">
-            Unlock smarter mortgage decisions in minutes. One small fee can save you thousands over your term.
+            Unlock unlimited deals, AI-powered insights, and expert guidance to save thousands on your mortgage.
         </p>
 
         <div class="pricing-options">
-            <!-- YEARLY PLAN -->
-            <div class="pricing-card featured">
-                <h2>Yearly Plan</h2>
+            <!-- FREE TIER (Reference) -->
+            <div class="pricing-card">
+                <h2>Free</h2>
                 <p class="price">
-                    £49 <span>/ year</span>
+                    £0 <span>forever</span>
                 </p>
-                <p class="tagline">Best for serious buyers & remortgagers</p>
+                <p class="tagline">Basic mortgage comparison</p>
 
                 <ul class="features-list">
-                    <li>✅ Unlimited mortgage deal tracking</li>
-                    <li>✅ Instant rate change alerts</li>
-                    <li>✅ Full fee breakdown (true cost calculator)</li>
-                    <li>✅ Remortgage reminders</li>
-                    <li>✅ Priority support</li>
+                    <li>✅ View 10 mortgage deals</li>
+                    <li>✅ Basic rate comparison</li>
+                    <li>✅ True cost calculator</li>
+                    <li>❌ No saved deals</li>
+                    <li>❌ No deal alerts</li>
+                    <li>❌ No AI eligibility checker</li>
                 </ul>
 
-                <a href="{{ url_for('upgrade_yearly') }}" class="btn-primary btn-block">
-                    Buy Yearly Access
+                <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-block">
+                    Current Plan
                 </a>
             </div>
 
-            <!-- MONTHLY PLAN -->
-            <div class="pricing-card">
-                <h2>Monthly Plan</h2>
+            <!-- PREMIUM TIER - £19.99/month -->
+            <div class="pricing-card featured">
+                <div class="badge">Most Popular</div>
+                <h2>Premium</h2>
                 <p class="price">
-                    £14.99 <span>/ month</span>
+                    £19.99 <span>/ month</span>
                 </p>
-                <p class="tagline">Try it while you’re house hunting</p>
+                <p class="tagline">For serious home buyers & remortgagers</p>
 
                 <ul class="features-list">
-                    <li>✅ All Pro features included</li>
-                    <li>✅ Cancel anytime</li>
-                    <li>✅ Perfect for short-term use</li>
+                    <li>✅ <strong>Unlimited mortgage deals</strong></li>
+                    <li>✅ <strong>Save your favorite deals</strong></li>
+                    <li>✅ <strong>Custom deal alerts</strong></li>
+                    <li>✅ True cost calculator</li>
+                    <li>✅ Rate change notifications</li>
+                    <li>✅ Remortgage reminders</li>
+                    <li>✅ Priority email support</li>
+                    <li>❌ No AI eligibility checker</li>
+                    <li>❌ No expert consultation</li>
                 </ul>
 
-                <a href="{{ url_for('upgrade_monthly') }}" class="btn-secondary btn-block">
-                    Start Monthly Plan
+                <a href="{{ url_for('upgrade_premium') }}" class="btn-primary btn-block">
+                    Get Premium for £19.99/mo
+                </a>
+            </div>
+
+            <!-- PREMIUM+ TIER - £49.99/month -->
+            <div class="pricing-card premium-plus">
+                <div class="badge gold">Best Value</div>
+                <h2>Premium+</h2>
+                <p class="price">
+                    £49.99 <span>/ month</span>
+                </p>
+                <p class="tagline">Complete mortgage concierge service</p>
+
+                <ul class="features-list">
+                    <li>✅ <strong>Everything in Premium</strong></li>
+                    <li>✅ <strong>AI Eligibility Checker</strong> (upload docs)</li>
+                    <li>✅ <strong>30-min Expert Consultation</strong></li>
+                    <li>✅ Personalized approval likelihood</li>
+                    <li>✅ Document analysis & recommendations</li>
+                    <li>✅ Direct broker matching</li>
+                    <li>✅ White-glove support</li>
+                </ul>
+
+                <a href="{{ url_for('upgrade_premium_plus') }}" class="btn-primary btn-block btn-gold">
+                    Get Premium+ for £49.99/mo
                 </a>
             </div>
         </div>
 
         <!-- VALUE MESSAGE -->
-        <p class="small text-center">
-            ⚡ Launch offer — Yearly plan only £49/year for full access.<br>
-            Join now to lock in this founding member price before we add new features.
-        </p>
+        <div class="value-section">
+            <h3>💡 Why Upgrade?</h3>
+            <p>
+                The average UK mortgage is £180,000. Even a <strong>0.1% rate difference</strong> could save you
+                <strong>£3,600 over 5 years</strong>. Our tools help you find the best deal faster.
+            </p>
+        </div>
 
         <!-- MONEY-BACK GUARANTEE -->
         <p class="guarantee text-center">
-            💸 7-Day Money-Back Guarantee – if you don’t love it, email us and we’ll refund you. No hassle.
+            💸 <strong>7-Day Money-Back Guarantee</strong> – Try risk-free. If you don't love it, email us for a full refund. No questions asked.
         </p>
+
+        <!-- TESTIMONIALS (Optional) -->
+        <div class="testimonial-section">
+            <p class="testimonial">
+                "Premium saved me hours of research. The deal alerts meant I didn't miss when rates dropped!"
+                <span>– Sarah M., London</span>
+            </p>
+        </div>
 
         <p class="text-center">
             <a href="{{ url_for('dashboard') }}" class="link-back">← Back to dashboard</a>
         </p>
     </div>
 </section>
-{% endblock %}
 
+<style>
+.pricing-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.pricing-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.pricing-card.featured {
+    border: 3px solid #2563eb;
+    box-shadow: 0 5px 20px rgba(37, 99, 235, 0.2);
+}
+
+.pricing-card.premium-plus {
+    border: 3px solid #f59e0b;
+    box-shadow: 0 5px 20px rgba(245, 158, 11, 0.2);
+}
+
+.badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #2563eb;
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.badge.gold {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.pricing-card h2 {
+    margin-top: 0.5rem;
+    font-size: 1.8rem;
+    color: #1f2937;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2563eb;
+    margin: 1rem 0;
+}
+
+.pricing-card.premium-plus .price {
+    color: #f59e0b;
+}
+
+.price span {
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: normal;
+}
+
+.tagline {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.features-list li {
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list li strong {
+    color: #1f2937;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: scale(1.02);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.btn-gold:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.value-section {
+    background: #f0f9ff;
+    border-left: 4px solid #2563eb;
+    padding: 1.5rem;
+    margin: 3rem 0;
+    border-radius: 8px;
+}
+
+.value-section h3 {
+    margin-top: 0;
+    color: #1e40af;
+}
+
+.guarantee {
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #92400e;
+    margin: 2rem 0;
+}
+
+.testimonial-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.testimonial {
+    font-style: italic;
+    color: #4b5563;
+    margin: 0;
+}
+
+.testimonial span {
+    display: block;
+    margin-top: 0.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    font-style: normal;
+}
+
+.link-back {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-back:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .pricing-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
