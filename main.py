@@ -1,4 +1,5 @@
 # main.py
+# Version: 2025-11-19 - Subscription tiers restored
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, flash, send_from_directory, abort
