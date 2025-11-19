@@ -1,5 +1,6 @@
 # Railway deployment trigger
 # This file forces Railway to redeploy when changed
-DEPLOYMENT_VERSION=premium-subscriptions-v1
-DEPLOYED_AT=2025-11-19
-FEATURES=Premium (£19.99) and Premium+ (£49.99) subscription tiers
+DEPLOYMENT_VERSION=production-deploy-v2
+DEPLOYED_AT=2025-11-19T22:10:00Z
+FEATURES=Full production deployment with Premium (£19.99) and Premium+ (£49.99) subscription tiers
+TRIGGER=Manual deployment via Claude Code
