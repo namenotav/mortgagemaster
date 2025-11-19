@@ -1,5 +1,6 @@
 # main.py
-# Version: 2025-11-19 - Subscription tiers restored
+# Version: 2025-11-19-PRODUCTION - £19.99 & £49.99 subscriptions LIVE
+# Railway deployment: ACTIVE
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, flash, send_from_directory, abort
