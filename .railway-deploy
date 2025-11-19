@@ -1,5 +1,5 @@
 # Railway deployment trigger
 # This file forces Railway to redeploy when changed
-DEPLOYMENT_VERSION=premium-subscriptions-v1
+DEPLOYMENT_VERSION=database-fix-v2
 DEPLOYED_AT=2025-11-19
-FEATURES=Premium (£19.99) and Premium+ (£49.99) subscription tiers
+CRITICAL_FIX=Fixed SQLite database path issue preventing site from loading
