@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Get Your Free Mortgage Quote | MortgageDealsHub{% endblock %}
+
+{% block content %}
+<section class="lead-capture-page">
+    <div class="container">
+        <h1 class="page-title">💰 Get Your Free Mortgage Quote in 60 Seconds</h1>
+        <p class="page-subtitle">
+            We'll match you with the best lenders for YOUR situation - including bad credit & low income specialists.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="lead-form-container">
+            <form method="POST" action="{{ url_for('submit_lead') }}" class="lead-form">
+                {{ form.hidden_tag() }}
+
+                <!-- Step 1: Property Details -->
+                <div class="form-section">
+                    <h3>🏠 Your Property</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="property_value">Property Value (£)</label>
+                            {{ form.property_value(class="form-control", placeholder="e.g. 250000") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deposit">Deposit Available (£)</label>
+                            {{ form.deposit(class="form-control", placeholder="e.g. 25000") }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purpose">Purchase Type</label>
+                        {{ form.purpose(class="form-control") }}
+                    </div>
+                </div>
+
+                <!-- Step 2: Your Situation -->
+                <div class="form-section">
+                    <h3>💼 Your Income & Credit</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="annual_income">Annual Income (£)</label>
+                            {{ form.annual_income(class="form-control", placeholder="e.g. 30000") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employment_type">Employment Type</label>
+                            {{ form.employment_type(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="credit_score">Credit Score (if known)</label>
+                            {{ form.credit_score(class="form-control") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label>Credit Issues?</label>
+                            <div class="checkbox-group">
+                                {{ form.has_ccj() }} {{ form.has_ccj.label }}
+                                {{ form.has_defaults() }} {{ form.has_defaults.label }}
+                                {{ form.has_arrears() }} {{ form.has_arrears.label }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Timeline -->
+                <div class="form-section">
+                    <h3>📅 Your Timeline</h3>
+                    
+                    <div class="form-group">
+                        <label for="timeline">When do you want to move?</label>
+                        {{ form.timeline(class="form-control") }}
+                    </div>
+                </div>
+
+                <!-- Step 4: Contact Details -->
+                <div class="form-section">
+                    <h3>📞 Your Contact Details</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            {{ form.name(class="form-control", placeholder="John Smith", required=True) }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            {{ form.email(class="form-control", placeholder="john@example.com", required=True) }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        {{ form.phone(class="form-control", placeholder="07123 456789", required=True) }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            {{ form.consent_marketing() }}
+                            I agree to be contacted about mortgage products and services
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <small>We take your privacy seriously. Your data will be shared only with carefully selected mortgage lenders and brokers. See our <a href="{{ url_for('privacy') }}">Privacy Policy</a>.</small>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-large btn-block">
+                        🚀 Get My Free Quote Now
+                    </button>
+                    <p class="form-note">No obligation. Free service. Takes 60 seconds.</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="trust-section">
+            <h3>✅ Why Choose Us?</h3>
+            <div class="trust-grid">
+                <div class="trust-item">
+                    <strong>40+ Lenders</strong>
+                    <p>Including bad credit specialists</p>
+                </div>
+                <div class="trust-item">
+                    <strong>100% Free</strong>
+                    <p>No hidden fees or charges</p>
+                </div>
+                <div class="trust-item">
+                    <strong>Fast Response</strong>
+                    <p>Quotes within 24 hours</p>
+                </div>
+                <div class="trust-item">
+                    <strong>FCA Regulated</strong>
+                    <p>Trusted & secure service</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.lead-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    margin-bottom: 1rem;
+    color: #2563eb;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-group label {
+    font-weight: normal;
+}
+
+.form-actions {
+    margin-top: 2rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.form-note {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.trust-section {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.trust-item strong {
+    display: block;
+    color: #2563eb;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.trust-item p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
