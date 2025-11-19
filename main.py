@@ -682,11 +682,18 @@ def register_routes(app):
     @app.route('/upgrade_premium')
     @login_required
     def upgrade_premium():
+        # Check if Premium tier is properly configured
+        price_id = app.config.get('STRIPE_PREMIUM_PRICE_ID', '')
+        if not price_id or 'PLACEHOLDER' in price_id:
+            flash('Premium tier is not yet available. Please try our PRO subscription instead!', 'info')
+            logging.warning(f"Premium tier not configured - redirecting user {current_user.email} to yearly upgrade")
+            return redirect(url_for('upgrade_yearly'))
+
         try:
             checkout = stripe.checkout.Session.create(
                 mode="subscription",
                 line_items=[{
-                    "price": app.config.get('STRIPE_PREMIUM_PRICE_ID', ''),
+                    "price": price_id,
                     "quantity": 1
                 }],
                 success_url=url_for('payment_success', _external=True),
@@ -709,11 +716,18 @@ def register_routes(app):
     @app.route('/upgrade_premium_plus')
     @login_required
     def upgrade_premium_plus():
+        # Check if Premium+ tier is properly configured
+        price_id = app.config.get('STRIPE_PREMIUM_PLUS_PRICE_ID', '')
+        if not price_id or 'PLACEHOLDER' in price_id:
+            flash('Premium+ tier is launching Q1 2026. Please try our PRO subscription for now!', 'info')
+            logging.warning(f"Premium+ tier not configured - redirecting user {current_user.email} to yearly upgrade")
+            return redirect(url_for('upgrade_yearly'))
+
         try:
             checkout = stripe.checkout.Session.create(
                 mode="subscription",
                 line_items=[{
-                    "price": app.config.get('STRIPE_PREMIUM_PLUS_PRICE_ID', ''),
+                    "price": price_id,
                     "quantity": 1
                 }],
                 success_url=url_for('payment_success', _external=True),
