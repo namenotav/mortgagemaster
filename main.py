@@ -183,6 +183,9 @@ class Deal(db.Model):
     product_fee = db.Column(db.Float, default=0)
     cashback = db.Column(db.Float, default=0)
 
+    # Affiliate tracking
+    apply_url = db.Column(db.String(500))  # Affiliate link to lender's application page
+
 
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1785,8 +1788,11 @@ def init_database():
         db.session.execute(db.text(
             "ALTER TABLE deal ADD COLUMN IF NOT EXISTS cashback FLOAT DEFAULT 0"
         ))
+        db.session.execute(db.text(
+            "ALTER TABLE deal ADD COLUMN IF NOT EXISTS apply_url VARCHAR(500)"
+        ))
         db.session.commit()
-        print("✅ Deal columns ensured (bad credit, income, fees)")
+        print("✅ Deal columns ensured (bad credit, income, fees, apply_url)")
     except Exception as e:
         print("⚠️ Deal column migration skipped:", e)
 
