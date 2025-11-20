@@ -630,11 +630,14 @@ def register_routes(app):
     @app.route('/upgrade_yearly')
     @login_required
     def upgrade_yearly():
+        price_id = app.config.get('STRIPE_YEARLY_PRICE_ID', 'price_1STXcVD2EDcoPFLNECjwrN1p')
+        logging.info(f"PRO Yearly upgrade attempt by {current_user.email} | Price ID: {price_id}")
+
         try:
             checkout = stripe.checkout.Session.create(
                 mode="subscription",
                 line_items=[{
-                    "price": app.config.get('STRIPE_YEARLY_PRICE_ID', 'price_1STXcVD2EDcoPFLNECjwrN1p'),
+                    "price": price_id,
                     "quantity": 1
                 }],
                 success_url=url_for('payment_success', _external=True),
@@ -642,25 +645,37 @@ def register_routes(app):
                 customer_email=current_user.email,
                 metadata={
                     'user_id': current_user.id,
-                    'user_email': current_user.email
+                    'user_email': current_user.email,
+                    'subscription_tier': 'pro_yearly'
                 }
             )
-            logging.info(f"Stripe checkout session created for user {current_user.email} (yearly)")
+            logging.info(f"✅ Stripe checkout created for {current_user.email} (PRO Yearly £49) - Session ID: {checkout.id}")
             return redirect(checkout.url)
+        except stripe.error.InvalidRequestError as e:
+            logging.error(f"❌ Stripe Invalid Request (Yearly): {str(e)} | Price ID: {price_id}")
+            flash(f'Payment configuration error: {str(e)}. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
+        except stripe.error.AuthenticationError as e:
+            logging.error(f"❌ Stripe Authentication Error (Yearly): {str(e)}")
+            flash('Payment system authentication failed. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
         except Exception as e:
-            logging.error(f"Stripe checkout error (yearly): {str(e)}")
-            flash('Payment system error. Please try again later.', 'danger')
+            logging.error(f"❌ Stripe checkout error (Yearly): {type(e).__name__}: {str(e)} | Price ID: {price_id}")
+            flash(f'Payment system error: {str(e)}. Please contact support.', 'danger')
             return redirect(url_for('upgrade'))
 
     # MONTHLY PAYMENT (£14.99/month)
     @app.route('/upgrade_monthly')
     @login_required
     def upgrade_monthly():
+        price_id = app.config.get('STRIPE_MONTHLY_PRICE_ID', 'price_1STXbDD2EDcoPFLN6hEU2gS9')
+        logging.info(f"PRO Monthly upgrade attempt by {current_user.email} | Price ID: {price_id}")
+
         try:
             checkout = stripe.checkout.Session.create(
                 mode="subscription",
                 line_items=[{
-                    "price": app.config.get('STRIPE_MONTHLY_PRICE_ID', 'price_1STXbDD2EDcoPFLN6hEU2gS9'),
+                    "price": price_id,
                     "quantity": 1
                 }],
                 success_url=url_for('payment_success', _external=True),
@@ -668,14 +683,23 @@ def register_routes(app):
                 customer_email=current_user.email,
                 metadata={
                     'user_id': current_user.id,
-                    'user_email': current_user.email
+                    'user_email': current_user.email,
+                    'subscription_tier': 'pro_monthly'
                 }
             )
-            logging.info(f"Stripe checkout session created for user {current_user.email} (monthly)")
+            logging.info(f"✅ Stripe checkout created for {current_user.email} (PRO Monthly £14.99) - Session ID: {checkout.id}")
             return redirect(checkout.url)
+        except stripe.error.InvalidRequestError as e:
+            logging.error(f"❌ Stripe Invalid Request (Monthly): {str(e)} | Price ID: {price_id}")
+            flash(f'Payment configuration error: {str(e)}. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
+        except stripe.error.AuthenticationError as e:
+            logging.error(f"❌ Stripe Authentication Error (Monthly): {str(e)}")
+            flash('Payment system authentication failed. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
         except Exception as e:
-            logging.error(f"Stripe checkout error (monthly): {str(e)}")
-            flash('Payment system error. Please try again later.', 'danger')
+            logging.error(f"❌ Stripe checkout error (Monthly): {type(e).__name__}: {str(e)} | Price ID: {price_id}")
+            flash(f'Payment system error: {str(e)}. Please contact support.', 'danger')
             return redirect(url_for('upgrade'))
 
     # NEW: PREMIUM SUBSCRIPTION (£19.99/month)
@@ -684,6 +708,11 @@ def register_routes(app):
     def upgrade_premium():
         # Check if Premium tier is properly configured
         price_id = app.config.get('STRIPE_PREMIUM_PRICE_ID', '')
+
+        # Debug logging
+        logging.info(f"Premium upgrade attempt by {current_user.email}")
+        logging.info(f"STRIPE_PREMIUM_PRICE_ID: {price_id}")
+
         if not price_id or 'PLACEHOLDER' in price_id:
             flash('Premium tier is not yet available. Please try our PRO subscription instead!', 'info')
             logging.warning(f"Premium tier not configured - redirecting user {current_user.email} to yearly upgrade")
@@ -705,11 +734,19 @@ def register_routes(app):
                     'subscription_tier': 'premium'  # Track tier in metadata
                 }
             )
-            logging.info(f"Stripe checkout session created for user {current_user.email} (Premium £19.99)")
+            logging.info(f"✅ Stripe checkout created for {current_user.email} (Premium £19.99) - Session ID: {checkout.id}")
             return redirect(checkout.url)
+        except stripe.error.InvalidRequestError as e:
+            logging.error(f"❌ Stripe Invalid Request (Premium): {str(e)} | Price ID: {price_id}")
+            flash(f'Payment configuration error: {str(e)}. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
+        except stripe.error.AuthenticationError as e:
+            logging.error(f"❌ Stripe Authentication Error (Premium): {str(e)}")
+            flash('Payment system authentication failed. Please contact support.', 'danger')
+            return redirect(url_for('upgrade'))
         except Exception as e:
-            logging.error(f"Stripe checkout error (Premium): {str(e)}")
-            flash('Payment system error. Please try again later.', 'danger')
+            logging.error(f"❌ Stripe checkout error (Premium): {type(e).__name__}: {str(e)} | Price ID: {price_id}")
+            flash(f'Payment system error: {str(e)}. Please contact support.', 'danger')
             return redirect(url_for('upgrade'))
 
     # NEW: PREMIUM+ SUBSCRIPTION (£49.99/month)
