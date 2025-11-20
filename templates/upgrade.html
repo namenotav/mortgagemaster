@@ -33,10 +33,10 @@
                 </a>
             </div>
 
-            <!-- PREMIUM TIER - £19.99/month -->
+            <!-- PRO TIER - £19.99/month -->
             <div class="pricing-card featured">
                 <div class="badge">Most Popular</div>
-                <h2>Premium</h2>
+                <h2>PRO</h2>
                 <p class="price">
                     £19.99 <span>/ month</span>
                 </p>
@@ -54,33 +54,33 @@
                     <li>❌ No expert consultation</li>
                 </ul>
 
-                <a href="{{ url_for('upgrade_premium') }}" class="btn-primary btn-block">
-                    Get Premium for £19.99/mo
+                <a href="{{ url_for('upgrade_monthly') }}" class="btn-primary btn-block">
+                    Get PRO for £19.99/mo
                 </a>
             </div>
 
-            <!-- PREMIUM+ TIER - £49.99/month -->
+            <!-- PREMIUM TIER - £49.99/month -->
             <div class="pricing-card premium-plus">
-                <div class="badge gold">Coming Q1 2026</div>
-                <h2>Premium+</h2>
+                <div class="badge gold">Best Value</div>
+                <h2>Premium</h2>
                 <p class="price">
                     £49.99 <span>/ month</span>
                 </p>
                 <p class="tagline">Complete mortgage concierge service</p>
 
                 <ul class="features-list">
-                    <li>✅ <strong>Everything in Premium</strong></li>
-                    <li>🔜 <strong>AI Eligibility Checker</strong> (coming soon)</li>
-                    <li>🔜 <strong>30-min Expert Consultation</strong> (coming soon)</li>
-                    <li>🔜 Personalized approval likelihood (coming soon)</li>
-                    <li>🔜 Document analysis & recommendations (coming soon)</li>
-                    <li>🔜 Direct broker matching (coming soon)</li>
+                    <li>✅ <strong>Everything in PRO</strong></li>
+                    <li>✅ <strong>AI Eligibility Checker</strong></li>
+                    <li>✅ <strong>30-min Expert Consultation</strong></li>
+                    <li>✅ Personalized approval likelihood</li>
+                    <li>✅ Document analysis & recommendations</li>
+                    <li>✅ Direct broker matching</li>
                     <li>✅ Priority email support (24-hour response)</li>
                 </ul>
 
-                <button class="btn-secondary btn-block" disabled style="opacity: 0.6; cursor: not-allowed;">
-                    Launching Q1 2026 - Join Waitlist Soon
-                </button>
+                <a href="{{ url_for('upgrade_premium') }}" class="btn-gold btn-block">
+                    Get Premium for £49.99/mo
+                </a>
             </div>
         </div>
 

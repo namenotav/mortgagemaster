@@ -67,18 +67,19 @@ class Config:
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET') or 'whsec_your_secret'
 
     # Stripe Price IDs (set these in environment variables for production)
-    STRIPE_YEARLY_PRICE_ID = os.environ.get('STRIPE_YEARLY_PRICE_ID') or 'price_1STXcVD2EDcoPFLNECjwrN1p'
+    # PRO Monthly (£19.99/month) - previously labeled "MONTHLY"
     STRIPE_MONTHLY_PRICE_ID = os.environ.get('STRIPE_MONTHLY_PRICE_ID') or 'price_1STXbDD2EDcoPFLN6hEU2gS9'
 
-    # NEW: Premium Subscription Price IDs (£19.99 and £49.99)
-    STRIPE_PREMIUM_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PRICE_ID') or 'price_PREMIUM_1999_PLACEHOLDER'
-    STRIPE_PREMIUM_PLUS_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PLUS_PRICE_ID') or 'price_PREMIUM_PLUS_4999_PLACEHOLDER'
+    # Premium (£49.99/month) - previously labeled "PREMIUM"
+    STRIPE_PREMIUM_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PRICE_ID') or 'price_PREMIUM_4999_PLACEHOLDER'
+
+    # DEPRECATED: Old price IDs (not used)
+    STRIPE_YEARLY_PRICE_ID = os.environ.get('STRIPE_YEARLY_PRICE_ID') or 'price_1STXcVD2EDcoPFLNECjwrN1p'
+    STRIPE_PREMIUM_PLUS_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PLUS_PRICE_ID') or 'price_PREMIUM_PLUS_PLACEHOLDER'
 
     # Pricing (in pence)
-    PRO_ONETIME_PRICE = 4900  # £49.00
-    PRO_MONTHLY_PRICE = 1499  # £14.99
-    PREMIUM_PRICE = 1999  # £19.99/month
-    PREMIUM_PLUS_PRICE = 4999  # £49.99/month
+    PRO_MONTHLY_PRICE = 1999  # £19.99/month
+    PREMIUM_PRICE = 4999  # £49.99/month
 
     # ==============================
     # 🌍 Site Info
