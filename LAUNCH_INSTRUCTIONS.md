@@ -15,9 +15,40 @@ Your site is **60% ready for soft launch**. Here's what works:
 
 ## 🔧 CRITICAL: Populate Missing Data (5 Minutes)
 
-### Step 1: Add Alternative Deals & Lender URLs
+### Step 1: Generate 2000+ Mortgage Deals (RECOMMENDED)
 
 Once Railway finishes deploying (watch the logs), visit this URL:
+
+```
+https://your-railway-app.railway.app/secret-generate-massive-deals-xyz
+```
+
+**What This Does:**
+- Generates **2,031 mortgage deals** covering ALL borrower types
+- 1,140 Mainstream deals (60 lenders: HSBC, Barclays, Nationwide, etc.)
+- 720 Specialist deals (45 lenders: Pepper Money, Kensington, etc.)
+- 160 Credit Union deals (20 unions: accepting 300+ credit score)
+- 11 Niche products (Guarantor, Shared Ownership, Bridging)
+- Adds application URLs to ALL deals
+- Enables "Apply Now" buttons sitewide
+
+**Borrower Coverage:**
+✅ Prime borrowers (700+ credit, £25k+ income)
+✅ Bad credit (300-600 score)
+✅ Self-employed / No payslips
+✅ Low/no income but have CASH (asset-based)
+✅ CCJs, IVAs, bankruptcies
+✅ Rejected by banks
+
+**Update Schedule:** Run this route 3x per week to refresh rates
+
+**You'll see a success message when complete.**
+
+---
+
+### Alternative: Quick Setup with 8 Basic Deals
+
+If you want to start with just a few deals first, visit:
 
 ```
 https://your-railway-app.railway.app/secret-populate-deals-xyz
@@ -28,7 +59,7 @@ https://your-railway-app.railway.app/secret-populate-deals-xyz
 - Adds application URLs to ALL existing deals
 - Enables "Apply Now" buttons sitewide
 
-**You'll see a success message when complete.**
+**Note:** This only adds ~36 total deals. Use the massive generator above for full market coverage.
 
 ---
 
@@ -128,10 +159,12 @@ https://your-railway-app.railway.app/secret-populate-deals-xyz
 ## 📝 Next Steps After Populating Data
 
 ### Immediate (Today):
-1. ✅ Visit `/secret-populate-deals-xyz`
-2. ✅ Test deal search - should see 30+ deals now
-3. ✅ Test "Apply Now" buttons - should link to lender sites
-4. ✅ Test lead form at `/get-quote`
+1. ✅ Visit `/secret-generate-massive-deals-xyz` to generate 2,031 deals
+2. ✅ Test deal search - should see 2,000+ deals now
+3. ✅ Test filtering by credit score (try 300, 500, 700+)
+4. ✅ Test filtering by income (try £0, £10k, £25k+)
+5. ✅ Test "Apply Now" buttons - should link to lender sites
+6. ✅ Test lead form at `/get-quote`
 
 ### This Week:
 1. Sign up for affiliate programs:
@@ -177,12 +210,16 @@ https://your-railway-app.railway.app/secret-populate-deals-xyz
 
 ## 📊 Current Database State
 
-After running `/secret-populate-deals-xyz`:
-- **~36 total mortgage deals** (28 existing + 8 new)
+After running `/secret-generate-massive-deals-xyz`:
+- **~2,031 total mortgage deals** covering ALL borrower types
+  - 1,140 Mainstream (Prime borrowers)
+  - 720 Specialist (Bad credit, self-employed)
+  - 160 Credit Unions (Low income, 300+ score)
+  - 11 Niche (Guarantor, Shared Ownership, Bridging)
 - **All deals have application URLs**
 - **Lead capture ready**
 - **Affiliate click tracking active**
-- **2 blog posts** (need 20+ more)
+- **2 blog posts** (need 20+ more for SEO)
 
 ---
 
