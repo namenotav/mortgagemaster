@@ -71,7 +71,7 @@ class Config:
     STRIPE_MONTHLY_PRICE_ID = os.environ.get('STRIPE_MONTHLY_PRICE_ID') or 'price_1STXbDD2EDcoPFLN6hEU2gS9'
 
     # Premium (£49.99/month) - previously labeled "PREMIUM"
-    STRIPE_PREMIUM_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PRICE_ID') or 'price_PREMIUM_4999_PLACEHOLDER'
+    STRIPE_PREMIUM_PRICE_ID = os.environ.get('STRIPE_PREMIUM_PRICE_ID') or 'price_1SUIiZD2EDcoPFLNzA8sAcik'
 
     # DEPRECATED: Old price IDs (not used)
     STRIPE_YEARLY_PRICE_ID = os.environ.get('STRIPE_YEARLY_PRICE_ID') or 'price_1STXcVD2EDcoPFLNECjwrN1p'
