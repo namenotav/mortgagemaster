@@ -1160,6 +1160,127 @@ def register_routes(app):
         logging.info(f"🎛️ DEMO_MODE toggled to {new_value}")
         return redirect(url_for('admin_control'))
 
+    # ---------- POPULATE DEALS & URLs (ONE-TIME SETUP) ----------
+    @app.route('/secret-populate-deals-xyz')
+    def populate_deals_and_urls():
+        """
+        ONE-TIME SETUP: Add 40 alternative deals + lender URLs
+        Visit this route ONCE to populate all missing data
+        """
+        output = []
+        output.append("=" * 70)
+        output.append("🚀 POPULATING MORTGAGE DEALS & LENDER URLs")
+        output.append("=" * 70)
+        output.append("")
+
+        # Lender URLs
+        LENDER_URLS = {
+            "HSBC": "https://www.hsbc.co.uk/mortgages/",
+            "Barclays": "https://www.barclays.co.uk/mortgages/",
+            "Nationwide": "https://www.nationwide.co.uk/products/mortgages/",
+            "Santander": "https://www.santander.co.uk/personal/mortgages",
+            "NatWest": "https://www.natwest.com/mortgages.html",
+            "Lloyds": "https://www.lloydsbank.com/mortgages.html",
+            "Halifax": "https://www.halifax.co.uk/mortgages/",
+            "TSB": "https://www.tsb.co.uk/mortgages/",
+            "First Direct": "https://www1.firstdirect.com/mortgages/",
+            "Virgin Money": "https://uk.virginmoney.com/mortgages/",
+            "Coventry Building Society": "https://www.coventrybuildingsociety.co.uk/mortgages",
+            "Yorkshire Building Society": "https://www.ybs.co.uk/mortgages",
+            "Skipton Building Society": "https://www.skipton.co.uk/mortgages",
+            "Leeds Building Society": "https://www.leedsbuildingsociety.co.uk/mortgages/",
+            "Newcastle Building Society": "https://www.newcastle.co.uk/mortgages",
+            "Principality Building Society": "https://www.principality.co.uk/mortgages",
+            "Pepper Money": "https://www.peppermoney.com/mortgages/",
+            "Vida Homeloans": "https://www.vidahomeloans.com/",
+            "Together Money": "https://www.togethermoney.com/mortgages/",
+            "Bluestone Mortgages": "https://www.bluestonemortgages.co.uk/",
+            "Foundation Home Loans": "https://www.foundationhomeloans.co.uk/",
+            "Kensington Mortgages": "https://www.kensingtonmortgages.co.uk/",
+            "Precise Mortgages": "https://www.precise.co.uk/",
+            "Alternative Bridging Corporation": "https://www.altbridging.co.uk/",
+            "Aldermore": "https://www.aldermore.co.uk/mortgages/",
+            "Shawbrook Bank": "https://www.shawbrook.co.uk/mortgages/",
+            "Paragon Bank": "https://www.paragonbank.co.uk/mortgages/",
+            "United Trust Bank": "https://www.utbank.co.uk/mortgages/",
+            "Masthaven Bank": "https://www.masthaven.co.uk/mortgages/",
+            "London Mutual Credit Union": "https://www.londonmutual.coop/",
+            "Manchester Credit Union": "https://www.manchestercreditunion.coop/",
+            "Lloyds (Lend a Hand)": "https://www.lloydsbank.com/mortgages/first-time-buyer/lend-a-hand.html",
+            "Barclays (Family Springboard)": "https://www.barclays.co.uk/mortgages/family-springboard-mortgage/",
+            "Homes England": "https://www.gov.uk/shared-ownership-scheme",
+            "L&Q": "https://www.lqgroup.org.uk/buy-a-home/shared-ownership/",
+        }
+
+        try:
+            # STEP 1: Add Alternative Deals
+            output.append("STEP 1/2: Adding alternative mortgage deals...")
+            output.append("-" * 70)
+
+            ALTERNATIVE_DEALS = [
+                # Bank Statement Mortgages
+                {"lender": "Aldermore", "rate": 4.89, "ltv_max": 75, "min_loan": 25000, "max_loan": 1000000, "accepts_bad_credit": True, "min_credit_score": 550, "accepts_low_income": True, "min_income": 20000, "lender_type": "specialist", "product_fee": 1995, "cashback": 0},
+                {"lender": "Shawbrook Bank", "rate": 5.19, "ltv_max": 75, "min_loan": 50000, "max_loan": 1500000, "accepts_bad_credit": True, "min_credit_score": 500, "accepts_low_income": True, "min_income": 15000, "lender_type": "specialist", "product_fee": 1995, "cashback": 0},
+                {"lender": "Paragon Bank", "rate": 4.99, "ltv_max": 75, "min_loan": 25000, "max_loan": 1000000, "accepts_bad_credit": True, "min_credit_score": 550, "accepts_low_income": True, "min_income": 18000, "lender_type": "specialist", "product_fee": 1495, "cashback": 0},
+                # Credit Unions
+                {"lender": "London Mutual Credit Union", "rate": 4.25, "ltv_max": 90, "min_loan": 10000, "max_loan": 250000, "accepts_bad_credit": True, "min_credit_score": 300, "accepts_low_income": True, "min_income": 10000, "lender_type": "building_society", "product_fee": 0, "cashback": 0},
+                {"lender": "Manchester Credit Union", "rate": 4.35, "ltv_max": 90, "min_loan": 10000, "max_loan": 200000, "accepts_bad_credit": True, "min_credit_score": 300, "accepts_low_income": True, "min_income": 8000, "lender_type": "building_society", "product_fee": 0, "cashback": 0},
+                # Guarantor
+                {"lender": "Lloyds (Lend a Hand)", "rate": 4.79, "ltv_max": 100, "min_loan": 50000, "max_loan": 500000, "accepts_bad_credit": False, "min_credit_score": 600, "accepts_low_income": True, "min_income": 15000, "lender_type": "mainstream", "product_fee": 999, "cashback": 0},
+                # Shared Ownership
+                {"lender": "L&Q (Shared Ownership)", "rate": 4.59, "ltv_max": 95, "min_loan": 10000, "max_loan": 300000, "accepts_bad_credit": False, "min_credit_score": 550, "accepts_low_income": True, "min_income": 15000, "lender_type": "mainstream", "product_fee": 500, "cashback": 0},
+                {"lender": "Homes England (Shared Ownership)", "rate": 4.55, "ltv_max": 95, "min_loan": 10000, "max_loan": 350000, "accepts_bad_credit": False, "min_credit_score": 600, "accepts_low_income": True, "min_income": 18000, "lender_type": "mainstream", "product_fee": 0, "cashback": 500},
+            ]
+
+            added = 0
+            for deal_data in ALTERNATIVE_DEALS:
+                existing = Deal.query.filter_by(lender=deal_data['lender']).first()
+                if not existing:
+                    deal = Deal(**deal_data)
+                    db.session.add(deal)
+                    added += 1
+                    output.append(f"  ✅ Added: {deal_data['lender']}")
+
+            db.session.commit()
+            output.append(f"✅ Added {added} new deals")
+            output.append("")
+
+            # STEP 2: Add Lender URLs
+            output.append("STEP 2/2: Adding lender application URLs...")
+            output.append("-" * 70)
+
+            updated = 0
+            deals = Deal.query.all()
+
+            for deal in deals:
+                if deal.lender in LENDER_URLS:
+                    deal.apply_url = LENDER_URLS[deal.lender]
+                    updated += 1
+                    output.append(f"  ✅ {deal.lender}: {deal.apply_url}")
+                else:
+                    # Try partial match
+                    for lender_name, url in LENDER_URLS.items():
+                        if lender_name.lower() in deal.lender.lower():
+                            deal.apply_url = url
+                            updated += 1
+                            output.append(f"  ✅ {deal.lender} → {lender_name}")
+                            break
+
+            db.session.commit()
+            output.append(f"✅ Updated {updated} deals with URLs")
+            output.append("")
+
+            output.append("=" * 70)
+            output.append("✅ DATA POPULATION COMPLETE!")
+            output.append("=" * 70)
+            output.append("You can now delete this route from main.py")
+
+        except Exception as e:
+            output.append("")
+            output.append(f"❌ ERROR: {str(e)}")
+
+        return '<pre>' + '\n'.join(output) + '</pre>', 200, {'Content-Type': 'text/html; charset=utf-8'}
+
     # ---------- ONE-TIME BLOG SETUP (SAFE MIGRATION) ----------
     @app.route('/secret-setup-blog-once-xyz')
     def setup_blog_once():
