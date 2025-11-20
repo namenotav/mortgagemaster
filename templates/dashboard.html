@@ -65,15 +65,14 @@
                 
                 {% if not current_user.is_pro() %}
                 <div class="upgrade-section">
-                    <h3>Upgrade to Pro</h3>
+                    <h3>Upgrade to PRO</h3>
                     <ul class="upgrade-benefits">
                         <li>✅ Unlimited tracked deals</li>
                         <li>✅ Real-time rate alerts</li>
                         <li>✅ Priority support</li>
                     </ul>
-                    <a href="{{ url_for('upgrade_yearly') }}" class="btn-primary btn-block">Upgrade for £49</a>
-                    <!-- Monthly Subscription Option -->
-                    <a href="{{ url_for('upgrade_monthly') }}" class="btn-secondary btn-block">Subscribe for £14.99/month</a>
+                    <a href="{{ url_for('upgrade_monthly') }}" class="btn-primary btn-block">Get PRO for £19.99/month</a>
+                    <a href="{{ url_for('upgrade_premium') }}" class="btn-secondary btn-block">Get Premium for £49.99/month</a>
                 </div>
                 {% endif %}
             </div>
