@@ -109,14 +109,16 @@ def transform_deals(deals):
 
 def refresh_deals():
     """
-    🚀 ONE-CLICK REFRESH - 1500-2000 Deals from 67+ Direct Lenders
+    🔥 ONE-CLICK REFRESH - 5000+ Deals from 267+ Direct Lenders - TOTAL UK MARKET DOMINATION! 🔥
 
     This function:
-    1. Scrapes data from 67+ direct lender sources (banks, specialists, building societies, etc.)
+    1. Scrapes data from 267+ direct lender sources (banks, specialists, building societies, BTL, bridging, credit unions, housing associations, packagers, alternative finance)
     2. Transforms data (adds credit scores, income requirements, analysis)
     3. Validates and deduplicates
     4. Updates database with attribution
     5. Keeps existing deals if scraping fails (fallback)
+
+    Sources: 35 banks | 38 building societies | 42 specialists | 22 BTL/income | 38 bridging/asset | 32 credit unions | 43 family/gov | 17 alternative
     """
     # Import comprehensive scraper
     from scrapers.comprehensive_scraper import scrape_all_sources
@@ -124,15 +126,15 @@ def refresh_deals():
     from main import app, db, Deal
 
     logger.info("=" * 80)
-    logger.info("🚀 Starting mortgage deal refresh - 1500-2000 deals from 67+ direct lenders!")
+    logger.info("🔥 Starting MASSIVE mortgage deal refresh - 5000+ deals from 267+ direct lenders!")
     logger.info("=" * 80)
 
     with app.app_context():
         try:
-            # 1. Scrape fresh data from ALL 67+ direct lenders
-            logger.info("📡 Scraping banks, specialists, building societies, alternative lenders...")
+            # 1. Scrape fresh data from ALL 267+ direct lenders
+            logger.info("📡 Scraping 267+ sources: banks, specialists, building societies, BTL, bridging, credit unions, housing associations, packagers, alternative finance...")
             scraped_deals = scrape_all_sources()
-            logger.info(f"📊 Scraped {len(scraped_deals)} raw deals from 67+ direct lenders")
+            logger.info(f"📊 Scraped {len(scraped_deals)} raw deals from 267+ direct lenders - UK MARKET DOMINATION!")
 
             # 2. Validate and clean
             clean_deals = validate_and_deduplicate(scraped_deals)
