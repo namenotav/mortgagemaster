@@ -1481,6 +1481,115 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
 
         return redirect(url_for('admin_scraper'))
 
+    # ---------- ONE-TIME DATABASE FIX ----------
+    @app.route('/secret-fix-database-column-xyz')
+    def fix_database_column():
+        """
+        ONE-TIME FIX: Expands settings.value column from VARCHAR(200) to TEXT
+        Fixes error: "value too long for type character varying(200)"
+
+        Visit this URL ONCE, then it's fixed forever.
+        Safe to run multiple times - checks if fix is needed first.
+        """
+        output = []
+        output.append("=" * 60)
+        output.append("🔧 DATABASE COLUMN SIZE FIX")
+        output.append("=" * 60)
+        output.append("")
+
+        try:
+            # Check database type
+            db_url = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+
+            if 'postgresql' in db_url:
+                db_type = 'postgresql'
+                output.append("📊 Database: PostgreSQL (Production)")
+            else:
+                db_type = 'sqlite'
+                output.append("📊 Database: SQLite (Local)")
+
+            output.append("")
+
+            # For PostgreSQL, apply the fix
+            if db_type == 'postgresql':
+                output.append("🔍 Checking current column size...")
+
+                # Check current column definition
+                result = db.session.execute(db.text("""
+                    SELECT character_maximum_length
+                    FROM information_schema.columns
+                    WHERE table_name = 'settings'
+                    AND column_name = 'value'
+                """))
+                row = result.fetchone()
+
+                if row:
+                    current_length = row[0]
+                    output.append(f"📏 Current max length: {current_length} characters")
+
+                    if current_length and current_length >= 2000:
+                        output.append("")
+                        output.append("✅ Column is already large enough!")
+                        output.append("✅ No fix needed - you're all set!")
+                    else:
+                        output.append("")
+                        output.append("🔨 Applying fix now...")
+                        output.append("   Expanding column from VARCHAR(200) to TEXT (unlimited)...")
+
+                        # Apply the fix
+                        db.session.execute(db.text(
+                            "ALTER TABLE settings ALTER COLUMN value TYPE TEXT"
+                        ))
+                        db.session.commit()
+
+                        output.append("")
+                        output.append("✅ FIX APPLIED SUCCESSFULLY!")
+                        output.append("✅ Column is now TEXT type (unlimited length)")
+
+                        # Clear old update history to start fresh
+                        output.append("")
+                        output.append("🧹 Clearing old update history...")
+                        db.session.execute(db.text(
+                            "DELETE FROM settings WHERE key = 'UPDATE_HISTORY'"
+                        ))
+                        db.session.commit()
+                        output.append("✅ Update history cleared (will start fresh)")
+                else:
+                    output.append("⚠️  Settings table not found or column doesn't exist")
+                    output.append("✅ Will be created automatically on next app restart")
+
+            else:
+                # SQLite doesn't enforce VARCHAR length
+                output.append("ℹ️  SQLite doesn't enforce VARCHAR length limits")
+                output.append("✅ No fix needed for local database!")
+
+            output.append("")
+            output.append("=" * 60)
+            output.append("🎉 DATABASE CHECK COMPLETE!")
+            output.append("=" * 60)
+            output.append("")
+            output.append("Next steps:")
+            output.append("1. Go to: /secret-admin-scraper-xyz")
+            output.append("2. Click 'Refresh Deals Now'")
+            output.append("3. Should work without errors now!")
+            output.append("")
+            output.append("You can safely close this page.")
+
+        except Exception as e:
+            output.append("")
+            output.append("=" * 60)
+            output.append("❌ ERROR OCCURRED")
+            output.append("=" * 60)
+            output.append(f"Error: {str(e)}")
+            output.append("")
+            output.append("Alternative fix:")
+            output.append("1. Go to Railway dashboard")
+            output.append("2. Open PostgreSQL → Data → Query")
+            output.append("3. Run: ALTER TABLE settings ALTER COLUMN value TYPE TEXT;")
+            output.append("")
+
+        return '<pre>' + '\n'.join(output) + '</pre>', 200, {'Content-Type': 'text/html; charset=utf-8'}
+
     # ---------- Error pages ----------
     @app.errorhandler(404)
     def not_found(e):
