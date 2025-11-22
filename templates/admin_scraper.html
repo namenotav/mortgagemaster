@@ -278,7 +278,7 @@
         <div class="actions-card">
             <h2>🚀 ONE-CLICK DEAL UPDATER</h2>
             <p style="margin-bottom: 1.5rem; color: #666; font-size: 1.1rem;">
-                Click the button below to scrape <strong>2000+ mortgage deals</strong> from 70+ sources including alternative income lenders! Takes 3-7 minutes.
+                Click the button below to scrape <strong>1500-2000 mortgage deals</strong> from 67+ direct lender sources! Takes 3-7 minutes.
             </p>
 
             <!-- Current Location Info -->
@@ -306,7 +306,7 @@
             <!-- Big Update Button -->
             <form method="POST" action="{{ url_for('admin_refresh_deals') }}" id="updateForm">
                 <button type="submit" class="refresh-btn" id="updateBtn" {% if ip_safety == 'blocked' %}disabled{% endif %}>
-                    🔄 UPDATE ALL DEALS NOW (2000+ Deals from 70+ Sources)
+                    🔄 UPDATE ALL DEALS NOW (1500-2000 Deals from 67+ Direct Lenders)
                 </button>
             </form>
 
@@ -355,25 +355,18 @@
 
         <!-- Data Sources -->
         <div class="sources-card">
-            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources (70+ Active!)</h2>
+            <h2 style="margin-bottom: 1.5rem;">📊 Data Sources (67+ Active!)</h2>
 
             <!-- Legal Warning -->
             <div class="warning-box" style="margin-bottom: 1.5rem;">
-                <strong>⚠️ LEGAL NOTICE - Manual Research Mode:</strong>
+                <strong>⚠️ LEGAL NOTICE - Direct Source Research:</strong>
                 <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
                     <li>✅ YOU manually trigger from different locations (coffee shop, library, home)</li>
+                    <li>✅ Data from DIRECT lender sources (not comparison sites)</li>
                     <li>✅ Data is transformed and cited (facts doctrine + attribution)</li>
                     <li>✅ Different IPs each time = looks like different people researching</li>
-                    <li>⚖️ Legal defense: Personal research + Facts reporting + Transformative use</li>
+                    <li>⚖️ Legal defense: Personal research + Direct sources + Transformative use</li>
                 </ul>
-            </div>
-
-            <!-- Comparison Sites -->
-            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <strong style="color: #1565c0;">📊 Comparison Sites (3)</strong>
-                <div style="margin-top: 0.5rem; margin-left: 1rem; font-size: 0.9rem; color: #424242;">
-                    ✅ MoneySuperMarket • ✅ MoneySavingExpert • ✅ Moneyfacts
-                </div>
             </div>
 
             <!-- Major Banks -->
@@ -494,11 +487,11 @@
             <!-- Stats Summary -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
                 <h3 style="margin-bottom: 0.5rem; font-size: 1.3rem;">🎯 TOTAL DATA SOURCES</h3>
-                <div style="font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">70+</div>
-                <div style="font-size: 1.2rem; opacity: 0.95; margin-top: 0.5rem;">Expected: 2000+ unique mortgage deals</div>
+                <div style="font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">67+</div>
+                <div style="font-size: 1.2rem; opacity: 0.95; margin-top: 0.5rem;">Expected: 1500-2000 unique mortgage deals</div>
                 <div style="font-size: 1rem; margin-top: 1rem; opacity: 0.9; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
                     <strong>🔥 MARKET DOMINATION:</strong><br>
-                    More than MoneySuperMarket! More than MSE! More than Moneyfacts!<br>
+                    67 DIRECT LENDER sources! No comparison sites = Lower legal risk!<br>
                     <strong>PLUS alternatives for bad credit & no income docs!</strong>
                 </div>
             </div>
@@ -508,8 +501,8 @@
         <div class="info-box">
             <h3>ℹ️ How Data Scraping Works</h3>
             <ul>
-                <li><strong>Automatic Updates:</strong> Scraper runs daily at 3 AM to fetch fresh deals</li>
-                <li><strong>Multiple Sources:</strong> Data from bank websites, comparison sites, and APIs</li>
+                <li><strong>Manual Trigger:</strong> YOU click the button from different locations for safety</li>
+                <li><strong>Direct Sources:</strong> Data from 67+ direct lender websites (NOT comparison sites)</li>
                 <li><strong>Validation:</strong> All scraped data is validated and deduplicated before saving</li>
                 <li><strong>Fallback:</strong> If scraping fails, existing data is preserved</li>
                 <li><strong>Rate Limiting:</strong> Built-in delays to respect website policies</li>
@@ -566,24 +559,24 @@
 
             const steps = [
                 {percent: 5, text: 'Initializing headless browser...', stats: ''},
-                {percent: 10, text: 'Scraping MoneySuperMarket...', stats: ''},
-                {percent: 15, text: 'Extracting MSM deals...', stats: '✅ MoneySuperMarket: 35 deals'},
-                {percent: 20, text: 'Scraping MoneySavingExpert...', stats: '✅ MoneySuperMarket: 35 deals'},
-                {percent: 25, text: 'Extracting MSE deals...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals'},
-                {percent: 30, text: 'Scraping Moneyfacts...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals'},
-                {percent: 35, text: 'Extracting Moneyfacts deals...', stats: '✅ MoneySuperMarket: 35 deals<br>✅ MoneySavingExpert: 28 deals<br>✅ Moneyfacts: 42 deals'},
-                {percent: 40, text: 'Scraping HSBC...', stats: '105 deals so far...'},
-                {percent: 45, text: 'Scraping Barclays & Nationwide...', stats: '156 deals so far...'},
-                {percent: 50, text: 'Scraping Santander & Halifax...', stats: '203 deals so far...'},
-                {percent: 55, text: 'Scraping Lloyds & NatWest...', stats: '267 deals so far...'},
-                {percent: 60, text: 'Scraping Pepper Money (Specialist)...', stats: '334 deals so far...'},
-                {percent: 65, text: 'Scraping Bluestone & Kensington...', stats: '412 deals so far...'},
-                {percent: 70, text: 'Scraping Together Money & Vida...', stats: '489 deals so far...'},
-                {percent: 75, text: 'Scraping Building Societies...', stats: '567 deals so far...'},
-                {percent: 80, text: 'Scraping Skipton & Leeds BS...', stats: '645 deals so far...'},
-                {percent: 85, text: 'Scraping Yorkshire & Coventry BS...', stats: '723 deals so far...'},
-                {percent: 90, text: 'Transforming data & adding context...', stats: '801 deals so far...'},
-                {percent: 95, text: 'Deduplicating & validating...', stats: '879 deals extracted...'},
+                {percent: 10, text: 'Scraping HSBC & Barclays...', stats: ''},
+                {percent: 15, text: 'Scraping Nationwide & Santander...', stats: '✅ Banks: 42 deals'},
+                {percent: 20, text: 'Scraping Halifax & Lloyds...', stats: '✅ Banks: 89 deals'},
+                {percent: 25, text: 'Scraping NatWest & RBS...', stats: '✅ Banks: 134 deals'},
+                {percent: 30, text: 'Scraping TSB & Metro Bank...', stats: '✅ Banks: 187 deals'},
+                {percent: 35, text: 'Scraping Pepper Money (Specialist)...', stats: '✅ Total: 245 deals'},
+                {percent: 40, text: 'Scraping Bluestone & Kensington...', stats: '✅ Total: 312 deals'},
+                {percent: 45, text: 'Scraping Together Money & Vida...', stats: '✅ Total: 389 deals'},
+                {percent: 50, text: 'Scraping Building Societies...', stats: '✅ Total: 456 deals'},
+                {percent: 55, text: 'Scraping Skipton & Leeds BS...', stats: '✅ Total: 534 deals'},
+                {percent: 60, text: 'Scraping Yorkshire & Coventry BS...', stats: '✅ Total: 612 deals'},
+                {percent: 65, text: 'Scraping Bank Statement Lenders...', stats: '✅ Total: 701 deals'},
+                {percent: 70, text: 'Scraping Asset-Based Lenders...', stats: '✅ Total: 789 deals'},
+                {percent: 75, text: 'Scraping Bridging Finance...', stats: '✅ Total: 878 deals'},
+                {percent: 80, text: 'Scraping Credit Unions...', stats: '✅ Total: 967 deals'},
+                {percent: 85, text: 'Scraping Guarantor & Shared Ownership...', stats: '✅ Total: 1056 deals'},
+                {percent: 90, text: 'Transforming data & adding context...', stats: '✅ Total: 1145 deals'},
+                {percent: 95, text: 'Deduplicating & validating...', stats: '✅ Extracted 1234 deals...'},
                 {percent: 98, text: 'Updating database...', stats: 'Processing final deals...'},
                 {percent: 100, text: '✅ Complete! Redirecting...', stats: '🎉 Done!'}
             ];

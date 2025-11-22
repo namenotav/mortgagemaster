@@ -1,22 +1,28 @@
 """
-🚀 COMPREHENSIVE MORTGAGE SCRAPER - 1000+ Deals from 38+ Sources
+🚀 COMPREHENSIVE MORTGAGE SCRAPER - 1500-2000 Deals from 67+ Direct Lenders
 
 This is the ONE-CLICK scraper that dominates the UK mortgage market by scraping:
-- 3 comparison sites
 - 15 major banks
 - 12 specialist lenders (bad credit)
 - 8 building societies
+- 7 bank statement lenders (no payslips)
+- 5 asset-based lenders (no income)
+- 8 bridging lenders
+- 7 credit unions
+- 3 guarantor lenders
+- 5 shared ownership providers
+- 5 alternative finance (P2P, Islamic)
 
-TOTAL: 38+ sources = 1000+ unique deals
+TOTAL: 67+ direct sources = 1500-2000 unique deals
 
-⚠️ LEGAL DEFENSE STRATEGY:
-1. Manual trigger (user clicks button from different locations)
-2. Data transformation (add context, analysis, calculations)
-3. Attribution (cite all sources with links)
-4. Facts doctrine (rates are facts, not copyrightable)
+⚠️ LEGAL STRATEGY:
+1. Direct sources (lender websites, NOT comparison sites)
+2. Manual trigger (user clicks button from different locations)
+3. Data transformation (add context, analysis, calculations)
+4. Attribution (cite all sources with links)
 5. Transformative use (add unique value beyond raw data)
 
-Author: MortgageDealsHub
+Author: MortgageMaster
 """
 
 import logging
@@ -57,54 +63,50 @@ class ComprehensiveMortgageScraper:
     def scrape_all(self) -> List[Dict]:
         """
         ONE-CLICK SCRAPE ALL SOURCES
-        Returns list of 2000+ mortgage deals from 70+ sources!
+        Returns list of 1500-2000 mortgage deals from 67+ direct lenders!
         """
-        logger.info("🚀 Starting comprehensive scrape of 70+ sources...")
+        logger.info("🚀 Starting comprehensive scrape of 67+ direct lenders...")
 
-        # Phase 1: Comparison Sites (3 sources)
-        logger.info("📊 Phase 1: Scraping comparison sites...")
-        self.scrape_comparison_sites()
-
-        # Phase 2: Major Banks (15 sources)
-        logger.info("🏦 Phase 2: Scraping major banks...")
+        # Phase 1: Major Banks (15 sources)
+        logger.info("🏦 Phase 1: Scraping major banks...")
         self.scrape_major_banks()
 
-        # Phase 3: Specialist Lenders (12 sources) - YOUR SECRET WEAPON!
-        logger.info("⭐ Phase 3: Scraping specialist lenders (bad credit)...")
+        # Phase 2: Specialist Lenders (12 sources) - YOUR SECRET WEAPON!
+        logger.info("⭐ Phase 2: Scraping specialist lenders (bad credit)...")
         self.scrape_specialist_lenders()
 
-        # Phase 4: Building Societies (8 sources)
-        logger.info("🏛️ Phase 4: Scraping building societies...")
+        # Phase 3: Building Societies (8 sources)
+        logger.info("🏛️ Phase 3: Scraping building societies...")
         self.scrape_building_societies()
 
-        # ========== NEW PHASES - ALTERNATIVE INCOME PATHWAYS ==========
+        # ========== ALTERNATIVE INCOME PATHWAYS ==========
 
-        # Phase 5: Bank Statement Lenders (7 sources) - NO PAYSLIPS NEEDED!
-        logger.info("💰 Phase 5: Scraping bank statement lenders (cash income accepted)...")
+        # Phase 4: Bank Statement Lenders (7 sources) - NO PAYSLIPS NEEDED!
+        logger.info("💰 Phase 4: Scraping bank statement lenders (cash income accepted)...")
         self.scrape_bank_statement_lenders()
 
-        # Phase 6: Asset-Based Lenders (5 sources) - LEND ON ASSETS!
-        logger.info("💎 Phase 6: Scraping asset-based lenders (no income needed)...")
+        # Phase 5: Asset-Based Lenders (5 sources) - LEND ON ASSETS!
+        logger.info("💎 Phase 5: Scraping asset-based lenders (no income needed)...")
         self.scrape_asset_based_lenders()
 
-        # Phase 7: Bridging Lenders (8 sources) - SHORT-TERM, NO INCOME CHECK!
-        logger.info("🌉 Phase 7: Scraping bridging lenders (6-24 months)...")
+        # Phase 6: Bridging Lenders (8 sources) - SHORT-TERM, NO INCOME CHECK!
+        logger.info("🌉 Phase 6: Scraping bridging lenders (6-24 months)...")
         self.scrape_bridging_lenders()
 
-        # Phase 8: Credit Unions (7 sources) - HUMAN REVIEW!
-        logger.info("🤝 Phase 8: Scraping credit unions (flexible criteria)...")
+        # Phase 7: Credit Unions (7 sources) - HUMAN REVIEW!
+        logger.info("🤝 Phase 7: Scraping credit unions (flexible criteria)...")
         self.scrape_credit_unions()
 
-        # Phase 9: Guarantor Lenders (3 sources) - ANY CREDIT SCORE!
-        logger.info("👨‍👩‍👧 Phase 9: Scraping guarantor lenders (family guarantor)...")
+        # Phase 8: Guarantor Lenders (3 sources) - ANY CREDIT SCORE!
+        logger.info("👨‍👩‍👧 Phase 8: Scraping guarantor lenders (family guarantor)...")
         self.scrape_guarantor_lenders()
 
-        # Phase 10: Shared Ownership (5 sources) - GOVERNMENT SCHEMES!
-        logger.info("🏘️ Phase 10: Scraping shared ownership (buy 25-75%)...")
+        # Phase 9: Shared Ownership (5 sources) - GOVERNMENT SCHEMES!
+        logger.info("🏘️ Phase 9: Scraping shared ownership (buy 25-75%)...")
         self.scrape_shared_ownership()
 
-        # Phase 11: Alternative Finance (5 sources) - P2P + ISLAMIC!
-        logger.info("🔄 Phase 11: Scraping alternative finance (P2P, Islamic)...")
+        # Phase 10: Alternative Finance (5 sources) - P2P + ISLAMIC!
+        logger.info("🔄 Phase 10: Scraping alternative finance (P2P, Islamic)...")
         self.scrape_alternative_finance()
 
         logger.info(f"✅ Scraping complete! Total deals: {len(self.deals)}")
@@ -112,68 +114,7 @@ class ComprehensiveMortgageScraper:
 
         return self.deals
 
-    # ========== PHASE 1: COMPARISON SITES ==========
-
-    def scrape_comparison_sites(self):
-        """Scrape the 3 main comparison sites"""
-
-        # 1. MoneySuperMarket
-        msm_deals = self.scrape_moneysupermarket()
-        self.deals.extend(msm_deals)
-        self.stats['comparison_sites'] += len(msm_deals)
-
-        # 2. MoneySavingExpert
-        mse_deals = self.scrape_moneysavingexpert()
-        self.deals.extend(mse_deals)
-        self.stats['comparison_sites'] += len(mse_deals)
-
-        # 3. Moneyfacts
-        moneyfacts_deals = self.scrape_moneyfacts()
-        self.deals.extend(moneyfacts_deals)
-        self.stats['comparison_sites'] += len(moneyfacts_deals)
-
-        logger.info(f"✅ Comparison sites: {self.stats['comparison_sites']} deals")
-
-    def scrape_moneysupermarket(self) -> List[Dict]:
-        """Scrape MoneySuperMarket - biggest comparison site"""
-        deals = []
-        try:
-            if PLAYWRIGHT_AVAILABLE:
-                deals = self._scrape_with_playwright("https://www.moneysupermarket.com/mortgages/best-buy-tables/", "MoneySuperMarket")
-            else:
-                deals = self._scrape_generic_site("https://www.moneysupermarket.com/mortgages/best-buy-tables/", "MoneySuperMarket")
-        except Exception as e:
-            logger.error(f"Error scraping MoneySuperMarket: {e}")
-
-        return deals
-
-    def scrape_moneysavingexpert(self) -> List[Dict]:
-        """Scrape MoneySavingExpert - Martin Lewis site"""
-        deals = []
-        try:
-            if PLAYWRIGHT_AVAILABLE:
-                deals = self._scrape_with_playwright("https://www.moneysavingexpert.com/mortgages/best-buys/", "MoneySavingExpert")
-            else:
-                deals = self._scrape_generic_site("https://www.moneysavingexpert.com/mortgages/best-buys/", "MoneySavingExpert")
-        except Exception as e:
-            logger.error(f"Error scraping MoneySavingExpert: {e}")
-
-        return deals
-
-    def scrape_moneyfacts(self) -> List[Dict]:
-        """Scrape Moneyfacts comparison tables"""
-        deals = []
-        try:
-            if PLAYWRIGHT_AVAILABLE:
-                deals = self._scrape_with_playwright("https://moneyfacts.co.uk/mortgages/best-mortgage-rates/", "Moneyfacts")
-            else:
-                deals = self._scrape_generic_site("https://moneyfacts.co.uk/mortgages/best-mortgage-rates/", "Moneyfacts")
-        except Exception as e:
-            logger.error(f"Error scraping Moneyfacts: {e}")
-
-        return deals
-
-    # ========== PHASE 2: MAJOR BANKS ==========
+    # ========== PHASE 1: MAJOR BANKS ==========
 
     def scrape_major_banks(self):
         """Scrape all 15 major UK banks"""
@@ -823,7 +764,7 @@ class ComprehensiveMortgageScraper:
 def scrape_all_sources() -> List[Dict]:
     """
     PUBLIC API: One-click scrape everything
-    Returns 1000+ mortgage deals from 38+ sources
+    Returns 1500-2000 mortgage deals from 67+ direct lender sources
     """
     scraper = ComprehensiveMortgageScraper()
     return scraper.scrape_all()

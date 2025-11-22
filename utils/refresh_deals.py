@@ -109,10 +109,10 @@ def transform_deals(deals):
 
 def refresh_deals():
     """
-    🚀 ONE-CLICK REFRESH - 1000+ Deals from 38+ Sources
+    🚀 ONE-CLICK REFRESH - 1500-2000 Deals from 67+ Direct Lenders
 
     This function:
-    1. Scrapes data from 38+ sources (comparison sites, banks, specialists, building societies)
+    1. Scrapes data from 67+ direct lender sources (banks, specialists, building societies, etc.)
     2. Transforms data (adds credit scores, income requirements, analysis)
     3. Validates and deduplicates
     4. Updates database with attribution
@@ -124,15 +124,15 @@ def refresh_deals():
     from main import app, db, Deal
 
     logger.info("=" * 80)
-    logger.info("🚀 Starting COMPREHENSIVE mortgage deal refresh - 1000+ deals from 38+ sources!")
+    logger.info("🚀 Starting mortgage deal refresh - 1500-2000 deals from 67+ direct lenders!")
     logger.info("=" * 80)
 
     with app.app_context():
         try:
-            # 1. Scrape fresh data from ALL 38+ sources
-            logger.info("📡 Scraping comparison sites, banks, specialists, building societies...")
+            # 1. Scrape fresh data from ALL 67+ direct lenders
+            logger.info("📡 Scraping banks, specialists, building societies, alternative lenders...")
             scraped_deals = scrape_all_sources()
-            logger.info(f"📊 Scraped {len(scraped_deals)} raw deals from 38+ sources")
+            logger.info(f"📊 Scraped {len(scraped_deals)} raw deals from 67+ direct lenders")
 
             # 2. Validate and clean
             clean_deals = validate_and_deduplicate(scraped_deals)
