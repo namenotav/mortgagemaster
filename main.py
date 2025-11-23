@@ -876,7 +876,7 @@ def register_routes(app):
             output.append("Step 1: Creating blog_post table...")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS blog_post (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     slug VARCHAR(200) UNIQUE NOT NULL,
                     title VARCHAR(500) NOT NULL,
                     meta_description VARCHAR(500),
@@ -1247,7 +1247,7 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             # Table 1: saved_deal
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS saved_deal (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     deal_id INTEGER NOT NULL,
                     saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1260,7 +1260,7 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             # Table 2: deal_alert
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS deal_alert (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     alert_type VARCHAR(50),
                     criteria TEXT,
@@ -1274,7 +1274,7 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             # Table 3: uploaded_document
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS uploaded_document (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     document_type VARCHAR(100),
                     file_path VARCHAR(500),
@@ -1287,7 +1287,7 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             # Table 4: eligibility_result
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS eligibility_result (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     deal_id INTEGER NOT NULL,
                     approval_score FLOAT,
@@ -1302,7 +1302,7 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
             # Table 5: consultation_booking
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS consultation_booking (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     booking_date TIMESTAMP,
                     status VARCHAR(50),
@@ -1674,7 +1674,7 @@ def init_database():
         # Table: saved_deal
         db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS saved_deal (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 deal_id INTEGER NOT NULL,
                 saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1686,7 +1686,7 @@ def init_database():
         # Table: deal_alert
         db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS deal_alert (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 alert_type VARCHAR(50),
                 criteria TEXT,
@@ -1699,7 +1699,7 @@ def init_database():
         # Table: uploaded_document
         db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS uploaded_document (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 document_type VARCHAR(100),
                 file_path VARCHAR(500),
@@ -1711,7 +1711,7 @@ def init_database():
         # Table: eligibility_result
         db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS eligibility_result (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 deal_id INTEGER NOT NULL,
                 approval_score FLOAT,
@@ -1725,7 +1725,7 @@ def init_database():
         # Table: consultation_booking
         db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS consultation_booking (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 booking_date TIMESTAMP,
                 status VARCHAR(50),
