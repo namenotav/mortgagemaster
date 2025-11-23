@@ -1613,33 +1613,26 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
                 'Kent Reliance', 'Teachers BS', 'Furness BS', 'Marsden BS', 'Saffron BS'
             ]
 
-            # Generate 2000+ variations (lender name + product variations)
+            # Generate 200+ variations (reduced for speed)
             for base_lender in real_lenders:
                 lenders.append((base_lender, 'mainstream'))
-                # Add product variations to reach 2000+ lenders
-                for product_type in ['Fixed 2yr', 'Fixed 3yr', 'Fixed 5yr', 'Fixed 10yr',
-                                     'Tracker', 'Variable', 'Offset', 'Buy-to-Let',
-                                     'First Time Buyer', 'Remortgage', 'Help to Buy',
-                                     'Shared Ownership', 'Self Build', 'Right to Buy',
-                                     'Green Mortgage', 'Professional', 'Large Loan',
-                                     'Bad Credit', 'Self Employed', 'Contractor']:
+                # Add only 5 key product variations for speed
+                for product_type in ['Fixed 2yr', 'Fixed 5yr', 'Tracker', 'Bad Credit', 'Buy-to-Let']:
                     lenders.append((f'{base_lender} {product_type}',
-                                   'specialist' if 'Bad Credit' in product_type or 'Self Employed' in product_type else 'mainstream'))
+                                   'specialist' if 'Bad Credit' in product_type else 'mainstream'))
 
-            # Credit score tiers
+            # Credit score tiers (reduced to 4)
             credit_tiers = [
-                (300, 450), (450, 550), (550, 650), (650, 700),
-                (700, 750), (750, 800), (800, 850), (850, 999)
+                (300, 550), (550, 650), (650, 750), (750, 999)
             ]
 
-            # LTV tiers
-            ltv_tiers = [60, 65, 70, 75, 80, 85, 90, 95]
+            # LTV tiers (reduced to 5)
+            ltv_tiers = [60, 70, 80, 90, 95]
 
-            # Loan amount tiers
+            # Loan amount tiers (reduced to 4)
             loan_tiers = [
-                (25000, 100000), (100000, 200000), (200000, 300000),
-                (300000, 500000), (500000, 750000), (750000, 1000000),
-                (1000000, 2000000), (2000000, 5000000)
+                (25000, 150000), (150000, 300000),
+                (300000, 750000), (750000, 2000000)
             ]
 
             # Rate calculation
