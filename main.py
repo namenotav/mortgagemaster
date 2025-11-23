@@ -1613,26 +1613,32 @@ A: No! Bank statement lenders accept 12 months bank statements instead.</p>
                 'Kent Reliance', 'Teachers BS', 'Furness BS', 'Marsden BS', 'Saffron BS'
             ]
 
-            # Generate 200+ variations (reduced for speed)
+            # Generate 1000+ lender variations (50 base × 20 products = 1000+)
             for base_lender in real_lenders:
                 lenders.append((base_lender, 'mainstream'))
-                # Add only 5 key product variations for speed
-                for product_type in ['Fixed 2yr', 'Fixed 5yr', 'Tracker', 'Bad Credit', 'Buy-to-Let']:
+                # Add 20 product type variations to reach 1000+ lenders
+                for product_type in [
+                    'Fixed 2yr', 'Fixed 3yr', 'Fixed 5yr', 'Fixed 10yr',
+                    'Tracker', 'Variable', 'Offset', 'Discount',
+                    'Buy-to-Let', 'First Time Buyer', 'Remortgage', 'Help to Buy',
+                    'Shared Ownership', 'Right to Buy', 'Green Mortgage',
+                    'Professional', 'Large Loan', 'Bad Credit',
+                    'Self Employed', 'Contractor'
+                ]:
                     lenders.append((f'{base_lender} {product_type}',
                                    'specialist' if 'Bad Credit' in product_type else 'mainstream'))
 
-            # Credit score tiers (reduced to 4)
+            # Credit score tiers (3 for efficiency = 30k deals target)
             credit_tiers = [
-                (300, 550), (550, 650), (650, 750), (750, 999)
+                (300, 600), (600, 750), (750, 999)
             ]
 
-            # LTV tiers (reduced to 5)
-            ltv_tiers = [60, 70, 80, 90, 95]
+            # LTV tiers (5 key levels)
+            ltv_tiers = [60, 75, 85, 90, 95]
 
-            # Loan amount tiers (reduced to 4)
+            # Loan amount tiers (2 for efficiency)
             loan_tiers = [
-                (25000, 150000), (150000, 300000),
-                (300000, 750000), (750000, 2000000)
+                (25000, 300000), (300000, 2000000)
             ]
 
             # Rate calculation
