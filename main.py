@@ -162,6 +162,28 @@ class Settings(db.Model):
         return Settings.get('DEMO_MODE', 'True') == 'True'
 
 
+class BlogPost(db.Model):
+    """Blog post model for PostgreSQL - matches blog_post table"""
+    __tablename__ = 'blog_post'
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(200), unique=True, nullable=False, index=True)
+    title = db.Column(db.String(500), nullable=False)
+    meta_description = db.Column(db.String(500))
+    content = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(100), default='MortgageDealsHub')
+    category = db.Column(db.String(100), index=True)
+    keywords = db.Column(db.String(500))
+    featured_image = db.Column(db.String(500))
+    published = db.Column(db.Boolean, default=True, index=True)
+    views = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<BlogPost {self.slug}>'
+
+
 # -------------------------------------------------
 # App Factory
 # -------------------------------------------------
@@ -739,61 +761,50 @@ def register_routes(app):
     # ---------- Mortgage Guides (Blog Posts from Database) ----------
     @app.route('/guides/<slug>')
     def guide_post(slug):
-        """Display a single blog post by slug"""
-        import sqlite3
-        conn = sqlite3.connect('instance/database.db')
-        cursor = conn.cursor()
+        """Display a single blog post by slug - PostgreSQL"""
+        # Query PostgreSQL using SQLAlchemy
+        post = BlogPost.query.filter_by(slug=slug, published=True).first()
 
-        cursor.execute("SELECT * FROM blog_post WHERE slug = ? AND published = 1", (slug,))
-        post_data = cursor.fetchone()
-
-        if not post_data:
-            conn.close()
+        if not post:
             abort(404)
 
         # Increment views
-        cursor.execute("UPDATE blog_post SET views = views + 1 WHERE slug = ?", (slug,))
-        conn.commit()
+        post.views += 1
+        db.session.commit()
 
-        # Parse post data
-        post = {
-            'id': post_data[0],
-            'slug': post_data[1],
-            'title': post_data[2],
-            'meta_description': post_data[3],
-            'content': post_data[4],
-            'author': post_data[5] or 'MortgageDealsHub',
-            'category': post_data[6],
-            'keywords': post_data[7],
-            'views': post_data[10] + 1,
-            'created_at': post_data[11]
+        # Convert to dict for template compatibility
+        post_dict = {
+            'id': post.id,
+            'slug': post.slug,
+            'title': post.title,
+            'meta_description': post.meta_description,
+            'content': post.content,
+            'author': post.author or 'MortgageDealsHub',
+            'category': post.category,
+            'keywords': post.keywords,
+            'views': post.views,
+            'created_at': post.created_at
         }
 
-        conn.close()
-
-        return render_template('guide_post.html', post=post)
+        return render_template('guide_post.html', post=post_dict)
 
     @app.route('/guides')
     def guides_index():
-        """List all published blog posts"""
-        import sqlite3
-        conn = sqlite3.connect('instance/database.db')
-        cursor = conn.cursor()
+        """List all published blog posts - PostgreSQL"""
+        # Query PostgreSQL using SQLAlchemy
+        posts_query = BlogPost.query.filter_by(published=True).order_by(BlogPost.created_at.desc()).all()
 
-        cursor.execute("SELECT id, slug, title, meta_description, category, views, created_at FROM blog_post WHERE published = 1 ORDER BY created_at DESC")
-        posts_data = cursor.fetchall()
-        conn.close()
-
+        # Convert to list of dicts for template compatibility
         posts = []
-        for p in posts_data:
+        for p in posts_query:
             posts.append({
-                'id': p[0],
-                'slug': p[1],
-                'title': p[2],
-                'meta_description': p[3],
-                'category': p[4],
-                'views': p[5],
-                'created_at': p[6]
+                'id': p.id,
+                'slug': p.slug,
+                'title': p.title,
+                'meta_description': p.meta_description,
+                'category': p.category,
+                'views': p.views,
+                'created_at': p.created_at
             })
 
         return render_template('guides_index.html', posts=posts)
