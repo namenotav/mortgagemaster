@@ -45,3 +45,11 @@ htmlcov/
 venv/
 env/
 ENV/
+
+# Backups (large files - don't commit to git)
+COMPLETE_BACKUP_*/
+backup_*/
+*.tar.gz
+*.zip
+MORTGAGEMASTER_BACKUP_*
+MORTGAGEMASTER_COMPLETE_BACKUP_*
