@@ -817,8 +817,8 @@ def register_routes(app):
 
     @app.route('/bad-credit-help')
     def bad_credit_help():
-        """Guide for getting mortgages with bad credit - REDIRECT to new blog"""
-        return redirect(url_for('guide_post', slug='bad-credit-mortgage'))
+        """Guide for getting mortgages with bad credit"""
+        return render_template('bad_credit_help.html')
 
     # ---------- Subscribe (from index.html form) ----------
     @app.route('/subscribe', methods=['POST'])
