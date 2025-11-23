@@ -350,10 +350,10 @@
 <!-- FREE VS PRO COMPARISON -->
 <section class="comparison-section">
     <div class="container">
-        <h2 class="section-title">✨ Free vs PRO — What's the Difference?</h2>
-        <p class="section-subtitle" style="text-align:center; margin-bottom:40px;">Choose the plan that's right for you. Both give you access to our 30,000+ deal database!</p>
+        <h2 class="section-title">✨ Choose Your Plan — Free, Premium, or Premium+</h2>
+        <p class="section-subtitle" style="text-align:center; margin-bottom:40px;">All plans give you access to our 30,000+ deal database. Upgrade for advanced features!</p>
 
-        <div class="comparison-table">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:30px; max-width:1200px; margin:0 auto;">
             <div class="comparison-column">
                 <div class="comparison-header free-header">
                     <h3>Free Forever</h3>
@@ -365,21 +365,22 @@
                     <li class="feature-yes">✅ Basic mortgage calculator</li>
                     <li class="feature-yes">✅ View top 10 matching deals</li>
                     <li class="feature-yes">✅ Credit score filtering (300+)</li>
-                    <li class="feature-no">❌ Full 30,000+ deal comparison</li>
+                    <li class="feature-no">❌ Unlimited deal comparison</li>
                     <li class="feature-no">❌ Rate change alerts</li>
                     <li class="feature-no">❌ Fee breakdown calculator</li>
                     <li class="feature-no">❌ Remortgage reminders</li>
                     <li class="feature-no">❌ Priority support</li>
+                    <li class="feature-no">❌ Export to Excel</li>
                 </ul>
                 <a href="{{ url_for('signup') }}" class="btn-secondary" style="padding:12px 30px;">Sign Up Free — No Card Required</a>
             </div>
 
             <div class="comparison-column featured-column">
-                <div class="comparison-badge">🏆 MOST POPULAR — BEST VALUE</div>
+                <div class="comparison-badge">🏆 MOST POPULAR</div>
                 <div class="comparison-header pro-header">
-                    <h3>PRO</h3>
-                    <p class="price">£49<span>/year</span></p>
-                    <p class="price-note">or £14.99/month • Save £130/year</p>
+                    <h3>Premium</h3>
+                    <p class="price">£19.99<span>/month</span></p>
+                    <p class="price-note">Perfect for homebuyers</p>
                 </div>
                 <ul class="comparison-features">
                     <li class="feature-yes">✅ Search ALL 30,000+ deals instantly</li>
@@ -387,17 +388,40 @@
                     <li class="feature-yes">✅ View UNLIMITED matching deals</li>
                     <li class="feature-yes">✅ Credit score filtering (300+)</li>
                     <li class="feature-yes">✅ Full deal comparison tools</li>
-                    <li class="feature-yes">✅ Rate change alerts (email/SMS)</li>
+                    <li class="feature-yes">✅ Rate change alerts (email)</li>
                     <li class="feature-yes">✅ Fee breakdown calculator</li>
                     <li class="feature-yes">✅ Remortgage reminders</li>
-                    <li class="feature-yes">✅ Priority support (24hr response)</li>
+                    <li class="feature-no">❌ Priority support (24hr)</li>
+                    <li class="feature-no">❌ Export to Excel</li>
                 </ul>
-                <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:15px 40px; font-size:18px;">🚀 Upgrade to PRO — Save Thousands</a>
+                <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:15px 40px; font-size:18px;">🚀 Get Premium — £19.99/mo</a>
+            </div>
+
+            <div class="comparison-column">
+                <div class="comparison-badge" style="background:#ff6b6b;">⭐ ULTIMATE</div>
+                <div class="comparison-header" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white;">
+                    <h3>Premium+</h3>
+                    <p class="price">£49.99<span>/month</span></p>
+                    <p class="price-note">For serious investors</p>
+                </div>
+                <ul class="comparison-features">
+                    <li class="feature-yes">✅ Everything in Premium</li>
+                    <li class="feature-yes">✅ Search ALL 30,000+ deals instantly</li>
+                    <li class="feature-yes">✅ Advanced mortgage calculator</li>
+                    <li class="feature-yes">✅ View UNLIMITED matching deals</li>
+                    <li class="feature-yes">✅ Credit score filtering (300+)</li>
+                    <li class="feature-yes">✅ Full deal comparison tools</li>
+                    <li class="feature-yes">✅ Rate change alerts (email/SMS)</li>
+                    <li class="feature-yes">✅ Fee breakdown calculator</li>
+                    <li class="feature-yes">✅ Priority support (24hr response)</li>
+                    <li class="feature-yes">✅ Export to Excel & PDF</li>
+                </ul>
+                <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:15px 40px; font-size:18px; background:#764ba2;">⭐ Get Premium+ — £49.99/mo</a>
             </div>
         </div>
 
         <div class="money-back">
-            <p style="font-size:18px;">💸 <strong>7-Day Money-Back Guarantee</strong> — Try PRO risk-free. Not happy? Full refund, no questions asked. Cancel anytime.</p>
+            <p style="font-size:18px;">💸 <strong>7-Day Money-Back Guarantee</strong> — Try Premium or Premium+ risk-free. Not happy? Full refund, no questions asked. Cancel anytime.</p>
         </div>
     </div>
 </section>
@@ -486,7 +510,7 @@
 
       <div class="faq-item">
         <h3>✅ Is MortgageDealsHub free to use?</h3>
-        <p>Yes! You can search 30,000+ mortgage deals and run calculations 100% free forever. No credit card required. Our optional PRO plan (£49/year) adds extra tools like unlimited deal tracking, rate change alerts, and advanced calculators.</p>
+        <p>Yes! You can search 30,000+ mortgage deals and run calculations 100% free forever. No credit card required. Our optional Premium (£19.99/month) or Premium+ (£49.99/month) plans add extra tools like unlimited deal tracking, rate change alerts, and advanced calculators.</p>
       </div>
 
       <div class="faq-item">
@@ -528,13 +552,13 @@
       <div class="container text-center">
         <h2>🚀 Ready to Find Your Perfect Mortgage from 30,000+ Deals?</h2>
         <p style="font-size:18px; margin:20px 0;">
-          Start <strong>FREE</strong> and search our massive database instantly. Or upgrade to <strong>PRO</strong> to unlock unlimited deal alerts, advanced calculators, fee breakdowns, and lifetime tracking for just <strong>£49/year</strong> (or £14.99/month).
+          Start <strong>FREE</strong> and search our massive database instantly. Or upgrade to <strong>Premium</strong> (£19.99/month) or <strong>Premium+</strong> (£49.99/month) to unlock unlimited deal alerts, advanced calculators, fee breakdowns, priority support and lifetime tracking.
         </p>
         <div style="margin-top:30px;">
           <a href="{{ url_for('signup') }}" class="btn-primary" style="margin-right:15px; padding:15px 35px; font-size:18px;">Start FREE Now — No Card Required</a>
-          <a href="{{ url_for('upgrade') }}" class="btn-upgrade" style="padding:15px 35px; font-size:18px;">See PRO Plans →</a>
+          <a href="{{ url_for('upgrade') }}" class="btn-upgrade" style="padding:15px 35px; font-size:18px;">See Premium Plans →</a>
         </div>
-        <p style="margin-top:20px; font-size:14px; color:#666;">💸 7-day money-back guarantee on PRO • Cancel anytime • 10,000+ happy users</p>
+        <p style="margin-top:20px; font-size:14px; color:#666;">💸 7-day money-back guarantee • Cancel anytime • 10,000+ happy users</p>
       </div>
     </section>
   </footer>
